@@ -58,14 +58,13 @@
 
         .modal-window__sections {
             margin-top: 30px;
-            margin-bottom: 50px;
             border-radius: 15px;
         }
 
         .modal-window__sections-title,
         .modal-window__random-title {
-            font-size: 40px;
-            margin-bottom: 40px;
+            font-size: 25px;
+            margin-bottom: 20px;
             color: #fff;
         }
 
@@ -82,13 +81,13 @@
 
         .modal-window__sections-list-item-btn {
             width: 100%;
-            min-width: 150px;
+            min-width: 90px;
             border: none;
             user-select: none;
             cursor: pointer;
             color: #fff;
-            padding: 20px;
-            border-radius: 20px;
+            padding: 10px;
+            border-radius: 5px;
             background: rgb(221, 36, 215);
             transition: all 0.2s ease-in-out;
         }
@@ -103,7 +102,7 @@
         }
 
         .modal-window__sections-list-item-name {
-            font-size: 25px;
+            font-size: 15px;
             font-weight: 500;
             font-family: Arial, sans-serif;
             line-height: 24px;
@@ -120,6 +119,38 @@
             display: block;
         }
 
+        .modal-window__random-format-name {
+            margin-bottom: 20px;
+            display: flex;
+            flex-wrap: wrap;
+        }
+
+        .modal-window__random-format-name__full,
+        .modal-window__random-format-name__last-initials,
+        .modal-window__random-format-name__last,
+        .modal-window__random-format-name__middle,
+        .modal-window__random-format-name__name-middle {
+            margin-right: 20px;
+            margin-bottom: 10px;
+            font-size: 15px;
+            border: none;
+            user-select: none;
+            cursor: pointer;
+            color: #fff;
+            padding: 10px;
+            border-radius: 5px;
+            background: rgb(26, 90, 122);
+            transition: all 0.4s ease-in-out;
+        }
+
+        .modal-window__random-format-name__full:hover,
+        .modal-window__random-format-name__last-initials:hover,
+        .modal-window__random-format-name__last:hover,
+        .modal-window__random-format-name__middle:hover,
+        .modal-window__random-format-name__name-middle:hover {
+            background: rgb(24, 67, 89);
+        }
+
         .modal-window__random-language {
             display: flex;
             margin-bottom: 20px;
@@ -128,19 +159,45 @@
         .modal-window__random-language__rus,
         .modal-window__random-language__eng {
             margin-right: 20px;
-            font-size: 20px;
+            font-size: 15px;
             border: none;
             user-select: none;
             cursor: pointer;
             color: #fff;
-            padding: 20px;
-            border-radius: 15px;
+            padding: 10px;
+            border-radius: 5px;
             background: rgb(26, 90, 122);
             transition: all 0.4s ease-in-out;
         }
 
         .modal-window__random-language__rus:hover,
         .modal-window__random-language__eng:hover {
+            background: rgb(24, 67, 89);
+        }
+
+        .modal-window__random-format {
+            display: flex;
+            margin-bottom: 20px;
+        }
+
+        .modal-window__random-format__long,
+        .modal-window__random-format__short,
+        .modal-window__random-format__random {
+            margin-right: 20px;
+            font-size: 15px;
+            border: none;
+            user-select: none;
+            cursor: pointer;
+            color: #fff;
+            padding: 10px;
+            border-radius: 5px;
+            background: rgb(26, 90, 122);
+            transition: all 0.4s ease-in-out;
+        }
+
+        .modal-window__random-format__long:hover,
+        .modal-window__random-format__short:hover,
+        .modal-window__random-format__random:hover {
             background: rgb(24, 67, 89);
         }
 
@@ -152,13 +209,13 @@
         .modal-window__random-gender__male,
         .modal-window__random-gender__woman {
             margin-right: 20px;
-            font-size: 20px;
+            font-size: 15px;
             border: none;
             user-select: none;
             cursor: pointer;
             color: #fff;
-            padding: 20px;
-            border-radius: 15px;
+            padding: 10px;
+            border-radius: 5px;
             background: rgb(26, 90, 122);
             transition: all 0.4s ease-in-out;
         }
@@ -183,35 +240,97 @@
                         </button>
                     </li>
                     <li class="modal-window__sections-list-item">
-                        <button class="modal-window__sections-list-item-btn" data-section="name">
+                        <button class="modal-window__sections-list-item-btn" data-section="address">
                             <p class="modal-window__sections-list-item-name">Адреса</p>
                         </button>
                     </li>
                 </ul>
             </div>
 
+
             <div class="modal-window__random" id="modalRandom">
                 <h2 class="modal-window__random-title">Random Sections</h2>
+
+                <div class="modal-window__random-format-name">
+                    <button class="modal-window__random-format-name__full" data-formatName="full">Фамилия Имя
+                        Отчество</button>
+                    <button class="modal-window__random-format-name__last-initials"
+                        data-formatName="lastInitials">Фамилия
+                        И.О.</button>
+                    <button class="modal-window__random-format-name__last" data-formatName="last">Фамилия</button>
+                    <button class="modal-window__random-format-name__middle" data-formatName="middle">Отчество</button>
+                    <button class="modal-window__random-format-name__name-middle" data-formatName="nameMiddle">Имя
+                        Отчество</button>
+                </div>
+
                 <div class="modal-window__random-language">
-                    <button class="modal-window__random-language__rus">Русское</button>
-                    <button class="modal-window__random-language__eng">Английское</button>
+                    <button class="modal-window__random-language__rus" data-lang="rus">Русское</button>
+                    <button class="modal-window__random-language__eng" data-lang="eng">Английское</button>
+                </div>
+                <div class="modal-window__random-format">
+                    <button class="modal-window__random-format__long" data-gender="long">Длинное</button>
+                    <button class="modal-window__random-format__short" data-gender="short">Короткое</button>
+                    <button class="modal-window__random-format__random" data-gender="random">Рандомно</button>
                 </div>
                 <div class="modal-window__random-gender">
-                    <button class="modal-window__random-gender__male">Мужское</button>
-                    <button class="modal-window__random-gender__woman">Женское</button>
+                    <button class="modal-window__random-gender__male" data-gender="male">Мужское</button>
+                    <button class="modal-window__random-gender__woman" data-gender="woman">Женское</button>
                 </div>
             </div>
+
         </div>
     </div>
 
     <script>
         const modalRandom = document.getElementById('modalRandom');
-        const btnName = document.getElementById('name');
+        const sectionBtn = document.querySelectorAll('.modal-window__sections-list-item-btn');
+        const dataSection = document.querySelectorAll('[data-section]');
 
-        btnName.addEventListener('click', () => {
-            parent.postMessage({ pluginMessage: { type: 'toggle-block' } }, '*');
-            modalRandom.classList.toggle('modal-window__random__active');
-        });
+        // section Random
+        const dataNameFormat = document.querySelectorAll('[data-formatName]');
+        const dataLang = document.querySelectorAll('[data-lang]');
+        const dataFormat = document.querySelectorAll('[data-format]');
+        const dataGender = document.querySelectorAll('[data-gender]');
+
+        const randomSettings = {
+            formatName: null,
+            lang: null,
+            format: null,
+            gender: null,
+        }
+
+
+
+        sectionBtn.forEach((btn) => {
+            btn.addEventListener('click', () => {
+                parent.postMessage({ pluginMessage: { type: 'block' } }, '*');
+                const section = btn.getAttribute('data-section');
+                if (section === "name") {
+                    modalRandom.classList.add('modal-window__random__active')
+                }
+            })
+        })
+
+        dataNameFormat.forEach((btn) => {
+            btn.addEventListener('click', () => {
+                randomSettings.formatName = btn.getAttribute('data-formatName');
+                console.log(`Формат имени ${randomSettings.formatName}`)
+            })
+        })
+
+        dataLang.forEach((btn) => {
+            btn.addEventListener('click', () => {
+                randomSettings.lang = btn.getAttribute('data-lang');
+                console.log(`lang selected ${randomSettings.lang}`);
+            })
+        })
+
+        dataGender.forEach((btn) => {
+            btn.addEventListener('click', () => {
+                randomSettings.gender = btn.getAttribute('data-gender');
+                console.log(` Пол ${randomSettings.gender}`)
+            })
+        })
 
     </script>
 </body>

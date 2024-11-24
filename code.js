@@ -1,16 +1,12 @@
-figma.showUI(__html__, { width: 500, height: 230 });
+figma.showUI(__html__, { width: 400, height: 250 });
 
 let currentHeight = 250;
 
 figma.ui.onmessage = (msg) => {
-    if (msg.type === 'toggle-block') {
+    if (msg.type === 'block') {
         if (currentHeight === 250) {
-            figma.ui.resize(500, 600);
+            figma.ui.resize(400, 600);
             currentHeight = 600;
-        } else {
-            figma.ui.resize(500, 250);
-            currentHeight = 250;
-        }
-        figma.notify('Block toggled!');
+        } 
     }
 };
