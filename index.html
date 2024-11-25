@@ -267,21 +267,25 @@
                     <button class="modal-window__random-language__rus" data-lang="rus">Русское</button>
                     <button class="modal-window__random-language__eng" data-lang="eng">Английское</button>
                 </div>
-                <div class="modal-window__random-format">
-                    <button class="modal-window__random-format__long" data-gender="long">Длинное</button>
-                    <button class="modal-window__random-format__short" data-gender="short">Короткое</button>
-                    <button class="modal-window__random-format__random" data-gender="random">Рандомно</button>
-                </div>
+
                 <div class="modal-window__random-gender">
                     <button class="modal-window__random-gender__male" data-gender="male">Мужское</button>
                     <button class="modal-window__random-gender__woman" data-gender="woman">Женское</button>
                 </div>
+
+                <div class="modal-window__random-format">
+                    <button class="modal-window__random-format__long" data-length="long">Длинное</button>
+                    <button class="modal-window__random-format__short" data-length="short">Короткое</button>
+                    <button class="modal-window__random-format__random" data-length="random">Рандомно</button>
+                </div>
+
             </div>
 
         </div>
     </div>
 
     <script>
+        // modal-random, btn-sections, btn[data-section]
         const modalRandom = document.getElementById('modalRandom');
         const sectionBtn = document.querySelectorAll('.modal-window__sections-list-item-btn');
         const dataSection = document.querySelectorAll('[data-section]');
@@ -289,48 +293,157 @@
         // section Random
         const dataNameFormat = document.querySelectorAll('[data-formatName]');
         const dataLang = document.querySelectorAll('[data-lang]');
-        const dataFormat = document.querySelectorAll('[data-format]');
+        const dataLength = document.querySelectorAll('[data-length]');
         const dataGender = document.querySelectorAll('[data-gender]');
+
+        const namesData = {
+            rus: {
+                male: {
+                    long: {
+                        firstNames: ["Константин", "Александр", "Владислав", "Николай", "Станислав"],
+                        lastNames: ["Константинов", "Александров", "Владиславов", "Николаев", "Станиславов"],
+                        middleNames: ["Константинович", "Александрович", "Владиславович", "Николаевич", "Станиславович"]
+                    },
+                    short: {
+                        firstNames: ["Ян", "Илья", "Макс", "Лев", "Егор"],
+                        lastNames: ["Петров", "Цак", "Миронов", "Соколов", "Иванов"],
+                        middleNames: ["Петрович", "Цакович", "Миронович", "Соколович", "Иванович"]
+                    }
+                },
+                woman: {
+                    long: {
+                        firstNames: ["Александра", "Валентина", "Екатерина", "Елизавета", "Светлана"],
+                        lastNames: ["Александрова", "Валентинова", "Екатерининская", "Елизаветина", "Светланова"],
+                        middleNames: ["Александровна", "Валентиновна", "Екатериновна", "Елизаветовна", "Светлановна"]
+                    },
+                    short: {
+                        firstNames: ["Аня", "Лена", "Юля", "Ира", "Зоя"],
+                        lastNames: ["Петрова", "Цакова", "Миронова", "Соколова", "Иванова"],
+                        middleNames: ["Петровна", "Цаковна", "Мироновна", "Соколовна", "Ивановна"]
+                    }
+                }
+            },
+            eng: {
+                male: {
+                    long: {
+                        firstNames: ["Alexander", "Christopher", "Nathaniel", "Benjamin", "Sebastian"],
+                        lastNames: ["Alexander", "Johnson", "Washington", "Henderson", "McAllister"],
+                        middleNames: ["Jonathan", "Nathaniel", "Christopher", "Alexander", "Sebastian"]
+                    },
+                    short: {
+                        firstNames: ["Tom", "Max", "Ian", "Leo", "Ben"],
+                        lastNames: ["Smith", "Jones", "Brown", "White", "Miller"],
+                        middleNames: ["J.", "C.", "N.", "A.", "S."]
+                    }
+                },
+                woman: {
+                    long: {
+                        firstNames: ["Elizabeth", "Catherine", "Victoria", "Madeline", "Alexandra"],
+                        lastNames: ["Johnson", "Harrison", "McArthur", "Fitzgerald", "Winchester"],
+                        middleNames: ["Victoria", "Elizabeth", "Madeline", "Alexandra", "Catherine"]
+                    },
+                    short: {
+                        firstNames: ["Amy", "Jane", "Emma", "Ivy", "Mia"],
+                        lastNames: ["Smith", "Jones", "Brown", "Davis", "Clark"],
+                        middleNames: ["J.", "E.", "M.", "A.", "I."]
+                    }
+                }
+            },
+            formats: {
+                full: (firstName, lastName, middleName) => `${lastName} ${firstName} ${middleName}`,
+                lastInitials: (firstName, lastName, middleName) => `${lastName} ${firstName[0]}.${middleName[0]}.`,
+                last: (lastName) => lastName,
+                first: (firstName) => firstName,
+                nameMiddle: (firstName, middleName) => `${firstName} ${middleName}`,
+                middle: (middleName) => `${middleName}`
+            },
+        };
 
         const randomSettings = {
             formatName: null,
             lang: null,
-            format: null,
+            length: null,
             gender: null,
-        }
+        };
 
-
-
+        // open modal window
         sectionBtn.forEach((btn) => {
             btn.addEventListener('click', () => {
                 parent.postMessage({ pluginMessage: { type: 'block' } }, '*');
                 const section = btn.getAttribute('data-section');
                 if (section === "name") {
-                    modalRandom.classList.add('modal-window__random__active')
+                    modalRandom.classList.add('modal-window__random__active');
                 }
-            })
-        })
+            });
+        });
 
-        dataNameFormat.forEach((btn) => {
+        // buttons added parameters for objects
+        function updateSettings() {
+            parent.postMessage({ pluginMessage: { type: 'generateName', settings: randomSettings } }, '*');
+        }
+
+        document.querySelectorAll('[data-formatName]').forEach(btn => {
             btn.addEventListener('click', () => {
                 randomSettings.formatName = btn.getAttribute('data-formatName');
-                console.log(`Формат имени ${randomSettings.formatName}`)
-            })
-        })
+                updateSettings();
+            });
+        });
 
-        dataLang.forEach((btn) => {
+        document.querySelectorAll('[data-lang]').forEach(btn => {
             btn.addEventListener('click', () => {
                 randomSettings.lang = btn.getAttribute('data-lang');
-                console.log(`lang selected ${randomSettings.lang}`);
-            })
-        })
+                updateSettings();
+            });
+        });
 
-        dataGender.forEach((btn) => {
+        document.querySelectorAll('[data-length]').forEach(btn => {
+            btn.addEventListener('click', () => {
+                randomSettings.length = btn.getAttribute('data-length');
+                updateSettings();
+            });
+        });
+
+        document.querySelectorAll('[data-gender]').forEach(btn => {
             btn.addEventListener('click', () => {
                 randomSettings.gender = btn.getAttribute('data-gender');
-                console.log(` Пол ${randomSettings.gender}`)
-            })
-        })
+                updateSettings();
+            });
+        });
+
+        function generateName(settings) {
+            const { lang, gender, length, formatName } = settings;
+
+            const lengthType = length === "random" ? (Math.random() > 0.5 ? "long" : "short") : length;
+
+            const names = namesData[lang]?.[gender]?.[lengthType];
+            if (!names) {
+                console.error("Не найдено данных для указанных параметров.");
+                return;
+            }
+
+            const firstName = names.firstNames[Math.floor(Math.random() * names.firstNames.length)];
+            const lastName = names.lastNames[Math.floor(Math.random() * names.lastNames.length)];
+            const middleName = names.middleNames[Math.floor(Math.random() * names.middleNames.length)];
+
+            let formattedName;
+
+            if (formatName === 'last') {
+                formattedName = namesData.formats.last(lastName);
+            } else if (formatName === 'middle') {
+                formattedName = namesData.formats.middle(middleName);
+            } else if (formatName === 'first') {
+                formattedName = namesData.formats.first(firstName);
+            } else {
+                formattedName = namesData.formats[formatName](firstName, lastName, middleName);
+            }
+
+            parent.postMessage({
+                pluginMessage: {
+                    type: 'generateName',  // Тип сообщения
+                    settings: randomSettings  // Настройки, которые передаются в generateName
+                }
+            }, '*');
+        }
 
     </script>
 </body>

@@ -7,6 +7,15 @@ figma.ui.onmessage = (msg) => {
         if (currentHeight === 250) {
             figma.ui.resize(400, 600);
             currentHeight = 600;
-        } 
+        }
+    }
+
+    if (msg.type === 'generateName') {
+        const { settings } = msg;
+        const name = generateName(settings);  // Генерация имени
+        figma.ui.postMessage({
+            type: 'generatedName', // Отправка результата обратно в UI
+            name: name
+        });
     }
 };
