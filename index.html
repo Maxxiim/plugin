@@ -224,6 +224,32 @@
         .modal-window__random-gender__woman:hover {
             background: rgb(24, 67, 89);
         }
+
+        .modal-window__random-transform {
+            display: flex;
+            margin-bottom: 20px;
+        }
+
+        .modal-window__random-transform__upper,
+        .modal-window__random-transform__lower,
+        .modal-window__random-transform__default {
+            margin-right: 20px;
+            font-size: 15px;
+            border: none;
+            user-select: none;
+            cursor: pointer;
+            color: #fff;
+            padding: 10px;
+            border-radius: 5px;
+            background: rgb(26, 90, 122);
+            transition: all 0.4s ease-in-out;
+        }
+
+        .modal-window__random-transform__upper:hover,
+        .modal-window__random-transform__lower:hover,
+        .modal-window__random-transform__default:hover {
+            background: rgb(24, 67, 89);
+        }
     </style>
 </head>
 
@@ -264,6 +290,14 @@
                         Отчество</button>
                 </div>
 
+                <div class="modal-window__random-transform">
+                    <button class="modal-window__random-transform__upper" data-transform="upper">ЗАГЛАВНЫЕ</button>
+                    <button class="modal-window__random-transform__lower" data-transform="lower">строчные</button>
+                    <button class="modal-window__random-transform__default" data-transform="default">
+                        По умолчанию
+                    </button>
+                </div>
+
                 <div class="modal-window__random-language">
                     <button class="modal-window__random-language__rus" data-lang="rus">Русское</button>
                     <button class="modal-window__random-language__eng" data-lang="eng">Английское</button>
@@ -296,6 +330,7 @@
         const dataLang = document.querySelectorAll('[data-lang]');
         const dataLength = document.querySelectorAll('[data-length]');
         const dataGender = document.querySelectorAll('[data-gender]');
+        const dataTransform = document.querySelectorAll('[data-transform]');
 
         const namesData = {
             rus: {
@@ -329,24 +364,20 @@
                     long: {
                         firstNames: ["Alexander", "Christopher", "Nathaniel", "Benjamin", "Sebastian"],
                         lastNames: ["Alexander", "Johnson", "Washington", "Henderson", "McAllister"],
-                        middleNames: ["Jonathan", "Nathaniel", "Christopher", "Alexander", "Sebastian"]
                     },
                     short: {
                         firstNames: ["Tom", "Max", "Ian", "Leo", "Ben"],
                         lastNames: ["Smith", "Jones", "Brown", "White", "Miller"],
-                        middleNames: ["J.", "C.", "N.", "A.", "S."]
                     }
                 },
                 woman: {
                     long: {
                         firstNames: ["Elizabeth", "Catherine", "Victoria", "Madeline", "Alexandra"],
                         lastNames: ["Johnson", "Harrison", "McArthur", "Fitzgerald", "Winchester"],
-                        middleNames: ["Victoria", "Elizabeth", "Madeline", "Alexandra", "Catherine"]
                     },
                     short: {
                         firstNames: ["Amy", "Jane", "Emma", "Ivy", "Mia"],
                         lastNames: ["Smith", "Jones", "Brown", "Davis", "Clark"],
-                        middleNames: ["J.", "E.", "M.", "A.", "I."]
                     }
                 }
             },
@@ -362,6 +393,7 @@
 
         const randomSettings = {
             formatName: 'first',
+            transform: "default",
             lang: "rus",
             length: "long",
             gender: "male",
@@ -379,17 +411,6 @@
         });
 
         // buttons added parameters for objects
-
-        function updateNameInFigma() {
-            const generatedName = generateName(randomSettings);
-            parent.postMessage({
-                pluginMessage: {
-                    type: 'updateText',
-                    content: generatedName
-                }
-            }, '*');
-        }
-
         dataNameFormat.forEach(btn => {
             btn.addEventListener('click', () => {
                 randomSettings.formatName = btn.getAttribute('data-formatName');
@@ -418,8 +439,57 @@
             });
         });
 
+        dataTransform.forEach(btn => {
+            btn.addEventListener('click', () => {
+                randomSettings.transform = btn.getAttribute('data-transform');
+                updateNameInFigma();
+            });
+        });
+
+        // functions for plugin 
+        function updateNameInFigma() {
+            const generatedName = generateName(randomSettings);
+            parent.postMessage({
+                pluginMessage: {
+                    type: 'updateText',
+                    content: generatedName
+                }
+            }, '*');
+        }
+
+        function hideBlockLanguage() {
+            if (randomSettings.lang === "eng") {
+                const formatsToHide = ["full", "lastInitials", "nameMiddle", "middle"];
+                dataNameFormat.forEach((block) => {
+                    const formatName = block.getAttribute('data-formatName');
+                    if (formatsToHide.includes(formatName)) {
+                        block.style.display = "none";
+                    }
+                });
+            } else {
+                dataNameFormat.forEach((block) => {
+                    block.style.display = "block";
+                });
+            }
+        };
+
+        function changeTransformText(text, transform) {
+            switch (transform) {
+                case 'upper':
+                    return text.toUpperCase();
+                case 'lower':
+                    return text.toLowerCase();
+                case 'default':
+                    return text.charAt(0).toUpperCase() + text.slice(1).toLowerCase();
+                default:
+                    return text;
+            };
+        };
+
         function generateName(settings) {
-            const { lang, gender, length, formatName } = settings;
+            const { lang, gender, length, formatName, transform } = settings;
+
+            hideBlockLanguage();
 
             const lengthType = length === "random" ? (Math.random() > 0.5 ? "long" : "short") : length;
 
@@ -432,15 +502,19 @@
             const lastName = names.lastNames[Math.floor(Math.random() * names.lastNames.length)];
             const middleName = names.middleNames[Math.floor(Math.random() * names.middleNames.length)];
 
+            let fullName = '';
+
             if (formatName === 'last') {
-                return namesData.formats.last(lastName);
+                fullName = namesData.formats.last(lastName);
             } else if (formatName === 'middle') {
-                return namesData.formats.middle(middleName);
+                fullName = namesData.formats.middle(middleName);
             } else if (formatName === 'first') {
-                return namesData.formats.first(firstName);
+                fullName = namesData.formats.first(firstName);
             } else {
-                return namesData.formats[formatName](firstName, lastName, middleName);
+                fullName = namesData.formats[formatName](firstName, lastName, middleName);
             }
+
+            return changeTransformText(fullName, transform);
         }
 
     </script>

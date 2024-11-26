@@ -16,7 +16,7 @@ let currentHeight = 250;
 figma.ui.onmessage = async (msg) => {
     if (msg.type === 'block') {
         if (currentHeight === 250) {
-            figma.ui.resize(400, 600);
+            figma.ui.resize(430, 600);
             currentHeight = 600;
         }
     }
