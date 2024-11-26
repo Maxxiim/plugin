@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 
 <head>
     <meta charset="UTF-8">
@@ -258,6 +258,7 @@
                         data-formatName="lastInitials">Фамилия
                         И.О.</button>
                     <button class="modal-window__random-format-name__last" data-formatName="last">Фамилия</button>
+                    <button class="modal-window__random-format-name__last" data-formatName="first">Имя</button>
                     <button class="modal-window__random-format-name__middle" data-formatName="middle">Отчество</button>
                     <button class="modal-window__random-format-name__name-middle" data-formatName="nameMiddle">Имя
                         Отчество</button>
@@ -360,7 +361,7 @@
         };
 
         const randomSettings = {
-            formatName: 'full',
+            formatName: 'first',
             lang: "rus",
             length: "long",
             gender: "male",
@@ -379,7 +380,6 @@
 
         // buttons added parameters for objects
 
-
         function updateNameInFigma() {
             const generatedName = generateName(randomSettings);
             parent.postMessage({
@@ -397,21 +397,21 @@
             });
         });
 
-        document.querySelectorAll('[data-lang]').forEach(btn => {
+        dataLang.forEach(btn => {
             btn.addEventListener('click', () => {
                 randomSettings.lang = btn.getAttribute('data-lang');
                 updateNameInFigma()
             });
         });
 
-        document.querySelectorAll('[data-length]').forEach(btn => {
+        dataLength.forEach(btn => {
             btn.addEventListener('click', () => {
                 randomSettings.length = btn.getAttribute('data-length');
                 updateNameInFigma()
             });
         });
 
-        document.querySelectorAll('[data-gender]').forEach(btn => {
+        dataGender.forEach(btn => {
             btn.addEventListener('click', () => {
                 randomSettings.gender = btn.getAttribute('data-gender');
                 updateNameInFigma()
@@ -422,19 +422,15 @@
             const { lang, gender, length, formatName } = settings;
 
             const lengthType = length === "random" ? (Math.random() > 0.5 ? "long" : "short") : length;
-            // console.log("Length type:", lengthType);
 
             const names = namesData[lang]?.[gender]?.[lengthType];
             if (!names) {
-                // console.error("Не найдено данных для указанных параметров:", settings);
                 return "Ошибка генерации имени";
             }
 
             const firstName = names.firstNames[Math.floor(Math.random() * names.firstNames.length)];
             const lastName = names.lastNames[Math.floor(Math.random() * names.lastNames.length)];
             const middleName = names.middleNames[Math.floor(Math.random() * names.middleNames.length)];
-
-            // console.log("Сгенерировано имя:", firstName, lastName, middleName);
 
             if (formatName === 'last') {
                 return namesData.formats.last(lastName);

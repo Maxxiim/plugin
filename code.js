@@ -1,3 +1,4 @@
+// function load Fonts for Figma
 async function loadFonts(fontNames) {
     if (Array.isArray(fontNames)) {
         for (const fontName of fontNames) {
