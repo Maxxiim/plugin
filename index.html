@@ -360,10 +360,10 @@
         };
 
         const randomSettings = {
-            formatName: null,
-            lang: null,
-            length: null,
-            gender: null,
+            formatName: 'full',
+            lang: "rus",
+            length: "long",
+            gender: "male",
         };
 
         // open modal window
@@ -378,35 +378,43 @@
         });
 
         // buttons added parameters for objects
-        function updateSettings() {
-            parent.postMessage({ pluginMessage: { type: 'generateName', settings: randomSettings } }, '*');
+
+
+        function updateNameInFigma() {
+            const generatedName = generateName(randomSettings);
+            parent.postMessage({
+                pluginMessage: {
+                    type: 'updateText',
+                    content: generatedName
+                }
+            }, '*');
         }
 
-        document.querySelectorAll('[data-formatName]').forEach(btn => {
+        dataNameFormat.forEach(btn => {
             btn.addEventListener('click', () => {
                 randomSettings.formatName = btn.getAttribute('data-formatName');
-                updateSettings();
+                updateNameInFigma()
             });
         });
 
         document.querySelectorAll('[data-lang]').forEach(btn => {
             btn.addEventListener('click', () => {
                 randomSettings.lang = btn.getAttribute('data-lang');
-                updateSettings();
+                updateNameInFigma()
             });
         });
 
         document.querySelectorAll('[data-length]').forEach(btn => {
             btn.addEventListener('click', () => {
                 randomSettings.length = btn.getAttribute('data-length');
-                updateSettings();
+                updateNameInFigma()
             });
         });
 
         document.querySelectorAll('[data-gender]').forEach(btn => {
             btn.addEventListener('click', () => {
                 randomSettings.gender = btn.getAttribute('data-gender');
-                updateSettings();
+                updateNameInFigma()
             });
         });
 
@@ -414,35 +422,29 @@
             const { lang, gender, length, formatName } = settings;
 
             const lengthType = length === "random" ? (Math.random() > 0.5 ? "long" : "short") : length;
+            // console.log("Length type:", lengthType);
 
             const names = namesData[lang]?.[gender]?.[lengthType];
             if (!names) {
-                console.error("Не найдено данных для указанных параметров.");
-                return;
+                // console.error("Не найдено данных для указанных параметров:", settings);
+                return "Ошибка генерации имени";
             }
 
             const firstName = names.firstNames[Math.floor(Math.random() * names.firstNames.length)];
             const lastName = names.lastNames[Math.floor(Math.random() * names.lastNames.length)];
             const middleName = names.middleNames[Math.floor(Math.random() * names.middleNames.length)];
 
-            let formattedName;
+            // console.log("Сгенерировано имя:", firstName, lastName, middleName);
 
             if (formatName === 'last') {
-                formattedName = namesData.formats.last(lastName);
+                return namesData.formats.last(lastName);
             } else if (formatName === 'middle') {
-                formattedName = namesData.formats.middle(middleName);
+                return namesData.formats.middle(middleName);
             } else if (formatName === 'first') {
-                formattedName = namesData.formats.first(firstName);
+                return namesData.formats.first(firstName);
             } else {
-                formattedName = namesData.formats[formatName](firstName, lastName, middleName);
+                return namesData.formats[formatName](firstName, lastName, middleName);
             }
-
-            parent.postMessage({
-                pluginMessage: {
-                    type: 'generateName',  // Тип сообщения
-                    settings: randomSettings  // Настройки, которые передаются в generateName
-                }
-            }, '*');
         }
 
     </script>
