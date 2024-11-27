@@ -250,6 +250,37 @@
         .modal-window__random-transform__default:hover {
             background: rgb(24, 67, 89);
         }
+
+        .modal-window__random-sort {
+            display: flex;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+
+        .modal-window__random-sort__title {
+            display: block;
+            width: 100%;
+        }
+
+        .modal-window__random-sort__default,
+        .modal-window__random-sort__alphabet {
+            display: block;
+            margin-right: 20px;
+            font-size: 15px;
+            border: none;
+            user-select: none;
+            cursor: pointer;
+            color: #fff;
+            padding: 10px;
+            border-radius: 5px;
+            background: rgb(26, 90, 122);
+            transition: all 0.4s ease-in-out;
+        }
+
+        .modal-window__random-sort__default:hover,
+        .modal-window__random-sort__alphabet:hover {
+            background: rgb(24, 67, 89);
+        }
     </style>
 </head>
 
@@ -298,6 +329,12 @@
                     </button>
                 </div>
 
+                <div class="modal-window__random-sort">
+                    <p class="modal-window__random-sort__title">Сортировать</p>
+                    <button class="modal-window__random-sort__default" data-sort="default">По умолчанию</button>
+                    <button class="modal-window__random-sort__alphabet" data-sort="alphabet">В алфавитном</button>
+                </div>
+
                 <div class="modal-window__random-language">
                     <button class="modal-window__random-language__rus" data-lang="rus">Русское</button>
                     <button class="modal-window__random-language__eng" data-lang="eng">Английское</button>
@@ -331,6 +368,7 @@
         const dataLength = document.querySelectorAll('[data-length]');
         const dataGender = document.querySelectorAll('[data-gender]');
         const dataTransform = document.querySelectorAll('[data-transform]');
+        const dataSort = document.querySelectorAll('[data-sort]');
 
         const namesData = {
             rus: {
@@ -394,6 +432,7 @@
         const randomSettings = {
             formatName: 'first',
             transform: "default",
+            sort: "default",
             lang: "rus",
             length: "long",
             gender: "male",
@@ -446,6 +485,12 @@
             });
         });
 
+        dataSort.forEach((btn) => {
+            btn.addEventListener('click', () => {
+                randomSettings.sort = btn.getAttribute('data-sort');
+                updateNameInFigma();
+            });
+        });
         // functions for plugin 
         function updateNameInFigma() {
             const generatedName = generateName(randomSettings);
