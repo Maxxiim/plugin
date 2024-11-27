@@ -531,21 +531,49 @@
             };
         };
 
+        function hideBlockLanguage() {
+            if (randomSettings.lang === "eng") {
+                const formatsToHide = ["full", "lastInitials", "nameMiddle", "middle"];  
+                dataNameFormat.forEach((block) => {
+                    const formatName = block.getAttribute('data-formatName');
+                    if (formatsToHide.includes(formatName)) {
+                        block.style.display = "none";
+                    } else {
+                        block.style.display = "block"; 
+                    }
+                });
+            } else {
+                dataNameFormat.forEach((block) => {
+                    block.style.display = "block";
+                });
+            }
+        }
+
         function generateName(settings) {
             const { lang, gender, length, formatName, transform } = settings;
 
-            hideBlockLanguage();
+            hideBlockLanguage(); 
 
             const lengthType = length === "random" ? (Math.random() > 0.5 ? "long" : "short") : length;
 
             const names = namesData[lang]?.[gender]?.[lengthType];
             if (!names) {
+                console.error("Ошибка: Нет данных для имен с заданными настройками", lang, gender, lengthType);
+                return "Ошибка генерации имени";
+            }
+
+            if (!Array.isArray(names.firstNames) || !Array.isArray(names.lastNames)) {
+                console.error("Ошибка: Недостаточно данных для генерации имени", names);
                 return "Ошибка генерации имени";
             }
 
             const firstName = names.firstNames[Math.floor(Math.random() * names.firstNames.length)];
             const lastName = names.lastNames[Math.floor(Math.random() * names.lastNames.length)];
-            const middleName = names.middleNames[Math.floor(Math.random() * names.middleNames.length)];
+
+            let middleName = '';
+            if (names.middleNames && Array.isArray(names.middleNames)) {
+                middleName = names.middleNames[Math.floor(Math.random() * names.middleNames.length)];
+            }
 
             let fullName = '';
 
