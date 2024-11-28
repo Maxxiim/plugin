@@ -492,15 +492,7 @@
             });
         });
         // functions for plugin 
-        function updateNameInFigma() {
-            const generatedName = generateName(randomSettings);
-            parent.postMessage({
-                pluginMessage: {
-                    type: 'updateText',
-                    content: generatedName
-                }
-            }, '*');
-        }
+
 
         function hideBlockLanguage() {
             if (randomSettings.lang === "eng") {
@@ -533,13 +525,13 @@
 
         function hideBlockLanguage() {
             if (randomSettings.lang === "eng") {
-                const formatsToHide = ["full", "lastInitials", "nameMiddle", "middle"];  
+                const formatsToHide = ["full", "lastInitials", "nameMiddle", "middle"];
                 dataNameFormat.forEach((block) => {
                     const formatName = block.getAttribute('data-formatName');
                     if (formatsToHide.includes(formatName)) {
                         block.style.display = "none";
                     } else {
-                        block.style.display = "block"; 
+                        block.style.display = "block";
                     }
                 });
             } else {
@@ -549,10 +541,21 @@
             }
         }
 
+        window.updateNameInFigma = function () {
+            const generatedName = generateName(randomSettings);
+            parent.postMessage({
+                pluginMessage: {
+                    type: 'updateText',
+                    content: generatedName
+                }
+            }, '*');
+        }
+
+
         function generateName(settings) {
             const { lang, gender, length, formatName, transform } = settings;
 
-            hideBlockLanguage(); 
+            hideBlockLanguage();
 
             const lengthType = length === "random" ? (Math.random() > 0.5 ? "long" : "short") : length;
 
