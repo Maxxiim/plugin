@@ -450,12 +450,20 @@
         });
 
         // buttons added parameters for objects
+
         dataNameFormat.forEach(btn => {
             btn.addEventListener('click', () => {
-                randomSettings.formatName = btn.getAttribute('data-formatName');
-                updateNameInFigma()
+                const formatName = btn.getAttribute('data-formatName');
+                parent.postMessage({ pluginMessage: { type: 'updateFormatName', formatName } }, '*');
             });
         });
+
+        // dataNameFormat.forEach(btn => {
+        //     btn.addEventListener('click', () => {
+        //         randomSettings.formatName = btn.getAttribute('data-formatName');
+        //         updateNameInFigma()
+        //     });
+        // });
 
         dataLang.forEach(btn => {
             btn.addEventListener('click', () => {
@@ -517,7 +525,7 @@
                 case 'lower':
                     return text.toLowerCase();
                 case 'default':
-                    return text.charAt(0).toUpperCase() + text.slice(1).toLowerCase();
+                    return text.charAt(0) + text.slice(1);
                 default:
                     return text;
             };
@@ -559,10 +567,11 @@
 
             const lengthType = length === "random" ? (Math.random() > 0.5 ? "long" : "short") : length;
 
-            const names = namesData[lang]?.[gender]?.[lengthType];
-            if (!names) {
-                console.error("Ошибка: Нет данных для имен с заданными настройками", lang, gender, lengthType);
-                return "Ошибка генерации имени";
+            let names;
+            if (namesData && namesData[lang] && namesData[lang][gender] && namesData[lang][gender][lengthType]) {
+                names = namesData[lang][gender][lengthType];
+            } else {
+                names = undefined;
             }
 
             if (!Array.isArray(names.firstNames) || !Array.isArray(names.lastNames)) {
