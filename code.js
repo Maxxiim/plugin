@@ -1,17 +1,18 @@
-const randomSettings = {
-    formatName: 'first',
-    transform: "default",
-    sort: "default",
-    lang: "rus",
-    length: "long",
-    gender: "male",
-};
+async function loadFonts(fontNames) {
+    if (Array.isArray(fontNames)) {
+        for (const fontName of fontNames) {
+            await figma.loadFontAsync(fontName);
+        }
+    } else {
+        await figma.loadFontAsync(fontNames);
+    }
+}
 
 const namesData = {
     rus: {
         male: {
             long: {
-                firstNames: ["Константин", "Александр", "Владислав", "Николай", "Максимус", "Максим", "Станислав"],
+                firstNames: ["Константин", "Александр", "Владислав", "Николай", "Станислав"],
                 lastNames: ["Константинов", "Александров", "Владиславов", "Николаев", "Станиславов"],
                 middleNames: ["Константинович", "Александрович", "Владиславович", "Николаевич", "Станиславович"]
             },
@@ -37,7 +38,7 @@ const namesData = {
     eng: {
         male: {
             long: {
-                firstNames: ["Alexander", "Christopher", "Nathaniel", "Benjamin", "Sebastian", "Maksim", "Maxim",],
+                firstNames: ["Alexander", "Christopher", "Nathaniel", "Benjamin", "Sebastian"],
                 lastNames: ["Alexander", "Johnson", "Washington", "Henderson", "McAllister"],
             },
             short: {
@@ -66,30 +67,13 @@ const namesData = {
     },
 };
 
-function hideBlockLanguage() {
-    if (randomSettings.lang === "eng") {
-        const formatsToHide = ["full", "lastInitials", "nameMiddle", "middle"];
-        dataNameFormat.forEach((block) => {
-            const formatName = block.getAttribute('data-formatName');
-            block.style.display = formatsToHide.includes(formatName) ? "none" : "block";
-        });
-    } else {
-        dataNameFormat.forEach((block) => {
-            block.style.display = "block";
-        });
-    }
-}
-
 function generateName(settings) {
+    console.log("Генерация имени с настройками:", settings);
+
     const { lang, gender, length, formatName, transform } = settings;
-
-    console.log('Генерация имени с параметрами:', settings);
-
-    // Определяем тип длины
     const lengthType = length === "random" ? (Math.random() > 0.5 ? "long" : "short") : length;
 
     let names;
-    // Проверяем наличие данных для генерации имени
     if (namesData && namesData[lang] && namesData[lang][gender] && namesData[lang][gender][lengthType]) {
         names = namesData[lang][gender][lengthType];
     } else {
@@ -97,50 +81,52 @@ function generateName(settings) {
         return "Ошибка генерации имени";
     }
 
-    // Проверка наличия массивов с именами
-    if (!Array.isArray(names.firstNames) || !Array.isArray(names.lastNames)) {
-        console.error("Ошибка: Недостаточно данных для генерации имени", names);
-        return "Ошибка генерации имени";
-    }
-
-    // Генерация случайных имен
     const firstName = names.firstNames[Math.floor(Math.random() * names.firstNames.length)];
     const lastName = names.lastNames[Math.floor(Math.random() * names.lastNames.length)];
-
     let middleName = '';
-    // Если есть среднее имя, то выбираем его случайным образом
     if (names.middleNames && Array.isArray(names.middleNames)) {
         middleName = names.middleNames[Math.floor(Math.random() * names.middleNames.length)];
     }
 
     let fullName = '';
 
-    // Формируем полное имя в зависимости от выбранного формата
-    const formatFunction = namesData.formats[formatName] || ((f, l, m) => f + " " + l);  // если формат не найден, используем дефолтный
-    fullName = formatFunction(firstName, lastName, middleName);
-
-    // Применяем трансформацию текста (верхний или нижний регистр)
-    const transformedName = changeTransformText(fullName, transform);
-
-    console.log('Генерируемое имя:', transformedName);
-
-    return transformedName;
-}
-
-async function loadFonts(fontNames) {
-    try {
-        if (Array.isArray(fontNames)) {
-            for (const fontName of fontNames) {
-                await figma.loadFontAsync({ family: fontName.family, style: fontName.style });
-            }
-        } else {
-            await figma.loadFontAsync({ family: fontNames.family, style: fontNames.style });
-        }
-    } catch (error) {
-        console.error('Ошибка при загрузке шрифта:', error);
-        figma.notify(`Ошибка загрузки шрифта: ${error.message}`);
+    if (formatName === 'last') {
+        fullName = namesData.formats.last(lastName);
+    } else if (formatName === 'middle') {
+        fullName = namesData.formats.middle(middleName);
+    } else if (formatName === 'first') {
+        fullName = namesData.formats.first(firstName);
+    } else {
+        fullName = namesData.formats[formatName](firstName, lastName, middleName);
     }
+
+    console.log("Сгенерированное имя:", fullName);
+    return changeTransformText(fullName, transform);
 }
+
+
+function changeTransformText(text, transform) {
+    switch (transform) {
+        case 'upper':
+            return text.toUpperCase();
+        case 'lower':
+            return text.toLowerCase();
+        case 'default':
+            return text.charAt(0) + text.slice(1);
+        default:
+            return text;
+    };
+};
+
+
+const randomSettings = {
+    formatName: 'first',
+    transform: "default",
+    sort: "default",
+    lang: "rus",
+    length: "long",
+    gender: "male",
+};
 
 figma.showUI(__html__, { width: 400, height: 250 });
 
@@ -149,60 +135,43 @@ let currentHeight = 250;
 figma.ui.onmessage = async (msg) => {
     if (msg.type === 'block') {
         if (currentHeight === 250) {
+            figma.ui.resize(400, 600);
             figma.ui.resize(430, 600);
             currentHeight = 600;
         }
     }
 
+    if (msg.type === 'updateSettings') {
+        if (msg.settings) {
+            randomSettings.gender = msg.settings.gender || randomSettings.gender;
+            randomSettings.lang = msg.settings.lang || randomSettings.lang;
+            randomSettings.formatName = msg.settings.formatName || randomSettings.formatName;
+            randomSettings.length = msg.settings.length || randomSettings.length;
+            randomSettings.transform = msg.settings.transform || randomSettings.transform;
+        }
+        figma.notify(`Настройки обновлены: Пол - ${randomSettings.gender}, Язык - ${randomSettings.lang}`);
+    }
+
     if (msg.type === 'updateText') {
         const selectedNodes = figma.currentPage.selection;
-        console.log(`Выбрано ${selectedNodes.length} объектов`);
 
         if (selectedNodes.length > 0) {
             for (const node of selectedNodes) {
                 if (node.type === 'TEXT') {
-                    console.log('Обновляем текстовый узел', node);
-
                     try {
-                        await loadFonts(node.fontName); // Загружаем шрифт, если нужно
+                        await loadFonts(node.fontName);
 
-                        const uniqueName = generateName(randomSettings); // Генерация имени
-                        console.log('Сгенерированное имя:', uniqueName);
+                        const uniqueName = generateName(randomSettings);
+                        const transformedName = changeTransformText(uniqueName, randomSettings.transform);
+                        node.characters = transformedName;
 
-                        node.characters = uniqueName; // Обновляем текст
                     } catch (error) {
-                        console.error('Ошибка обновления текста:', error);
-                        figma.notify(`Ошибка обновления текста: ${error.message}`);
+                        figma.notify(`Ошибка загрузки шрифта: ${error.message}`);
                     }
                 }
             }
         } else {
-            figma.notify("Выберите текстовые объекты, чтобы обновить имя.");
+            figma.notify("Выберите текстовый объект, чтобы обновить имя.");
         }
     }
-
-    if (msg.type === 'updateFormatName') {
-        // Обновление формата имени
-        randomSettings.formatName = msg.formatName;
-        console.log(`Формат имени обновлен: ${randomSettings.formatName}`);
-
-        // Генерация имени с новым форматом
-        const generatedName = generateName(randomSettings);
-        console.log(`Сгенерированное имя: ${generatedName}`);
-
-        // Отправка сгенерированного имени в UI
-        figma.ui.postMessage({ type: 'setGeneratedName', generatedName });
-    }
 };
-
-// Дополнительная функция для преобразования текста
-function changeTransformText(text, transform) {
-    switch (transform) {
-        case "uppercase":
-            return text.toUpperCase();
-        case "lowercase":
-            return text.toLowerCase();
-        default:
-            return text;
-    }
-}

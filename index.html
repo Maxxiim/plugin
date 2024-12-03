@@ -454,21 +454,35 @@
         dataNameFormat.forEach(btn => {
             btn.addEventListener('click', () => {
                 const formatName = btn.getAttribute('data-formatName');
+                randomSettings.formatName = formatName;
                 parent.postMessage({ pluginMessage: { type: 'updateFormatName', formatName } }, '*');
+                updateNameInFigma();
             });
         });
 
-        // dataNameFormat.forEach(btn => {
-        //     btn.addEventListener('click', () => {
-        //         randomSettings.formatName = btn.getAttribute('data-formatName');
-        //         updateNameInFigma()
-        //     });
-        // });
-
         dataLang.forEach(btn => {
             btn.addEventListener('click', () => {
-                randomSettings.lang = btn.getAttribute('data-lang');
-                updateNameInFigma()
+                
+                const changeLang = btn.getAttribute('data-lang');
+                randomSettings.lang = changeLang;
+
+                parent.postMessage({
+                    pluginMessage: {
+                        type: 'updateSettings',
+                        settings: { lang: changeLang }
+                    }
+                }, '*');
+
+                const formatName = btn.getAttribute('data-formatName');
+                if (formatName) {
+                    parent.postMessage({
+                        pluginMessage: {
+                            type: 'updateFormatName',
+                            formatName
+                        }
+                    }, '*');
+                }
+                updateNameInFigma();
             });
         });
 
@@ -500,7 +514,15 @@
             });
         });
         // functions for plugin 
-
+        function updateNameInFigma() {
+            const generatedName = generateName(randomSettings);
+            parent.postMessage({
+                pluginMessage: {
+                    type: 'updateText',
+                    content: generatedName
+                }
+            }, '*');
+        }
 
         function hideBlockLanguage() {
             if (randomSettings.lang === "eng") {
@@ -549,21 +571,10 @@
             }
         }
 
-        window.updateNameInFigma = function () {
-            const generatedName = generateName(randomSettings);
-            parent.postMessage({
-                pluginMessage: {
-                    type: 'updateText',
-                    content: generatedName
-                }
-            }, '*');
-        }
-
-
         function generateName(settings) {
             const { lang, gender, length, formatName, transform } = settings;
 
-            hideBlockLanguage();
+            // hideBlockLanguage();
 
             const lengthType = length === "random" ? (Math.random() > 0.5 ? "long" : "short") : length;
 
@@ -571,7 +582,8 @@
             if (namesData && namesData[lang] && namesData[lang][gender] && namesData[lang][gender][lengthType]) {
                 names = namesData[lang][gender][lengthType];
             } else {
-                names = undefined;
+                console.error("Ошибка: Недостаточно данных для генерации имени", namesData);
+                return "Ошибка генерации имени";
             }
 
             if (!Array.isArray(names.firstNames) || !Array.isArray(names.lastNames)) {
@@ -601,6 +613,7 @@
 
             return changeTransformText(fullName, transform);
         }
+
 
     </script>
 </body>
