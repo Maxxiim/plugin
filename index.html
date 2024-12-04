@@ -370,52 +370,104 @@
         const dataTransform = document.querySelectorAll('[data-transform]');
         const dataSort = document.querySelectorAll('[data-sort]');
 
+
         const namesData = {
             rus: {
                 male: {
                     long: {
-                        firstNames: ["Константин", "Александр", "Владислав", "Николай", "Станислав"],
-                        lastNames: ["Константинов", "Александров", "Владиславов", "Николаев", "Станиславов"],
-                        middleNames: ["Константинович", "Александрович", "Владиславович", "Николаевич", "Станиславович"]
+                        firstNames: [
+                            "Константин", "Александр", "Владислав", "Николай", "Станислав", "Дмитрий", "Иван", "Петр", "Максим", "Артем",
+                            "Евгений", "Роман", "Виктор", "Григорий", "Юрий", "Анатолий", "Сергей", "Михаил", "Алексей", "Тимофей"
+                        ],
+                        lastNames: [
+                            "Константинов", "Александров", "Владиславов", "Николаев", "Станиславов", "Петров", "Иванов", "Максимов", "Артемов",
+                            "Евгеньев", "Романов", "Викторов", "Григорьев", "Юрьев", "Анатольев", "Сергеев", "Михайлов", "Алексеев", "Тимофеев"
+                        ],
+                        middleNames: [
+                            "Константинович", "Александрович", "Владиславович", "Николаевич", "Станиславович", "Петрович", "Иванович", "Максимович",
+                            "Артемович", "Евгеньевич", "Романович", "Викторович", "Григорьевич", "Юрьевич", "Анатольевич", "Сергеевич", "Михайлович",
+                            "Алексеевич", "Тимофеевич"
+                        ]
                     },
                     short: {
-                        firstNames: ["Ян", "Илья", "Макс", "Лев", "Егор"],
-                        lastNames: ["Петров", "Цак", "Миронов", "Соколов", "Иванов"],
-                        middleNames: ["Петрович", "Цакович", "Миронович", "Соколович", "Иванович"]
+                        firstNames: [
+                            "Ян", "Илья", "Макс", "Лев", "Егор", "Даня", "Гоша", "Коля", "Тимур", "Рома", "Саша", "Семен", "Паша", "Андрей"
+                        ],
+                        lastNames: [
+                            "Петров", "Цак", "Миронов", "Соколов", "Иванов", "Лебедев", "Кузнецов", "Смирнов", "Попов", "Ковалев"
+                        ],
+                        middleNames: [
+                            "Петрович", "Цакович", "Миронович", "Соколович", "Иванович", "Лебедевич", "Кузнецович", "Смирнович", "Попович", "Ковалевич"
+                        ]
                     }
                 },
                 woman: {
                     long: {
-                        firstNames: ["Александра", "Валентина", "Екатерина", "Елизавета", "Светлана"],
-                        lastNames: ["Александрова", "Валентинова", "Екатерининская", "Елизаветина", "Светланова"],
-                        middleNames: ["Александровна", "Валентиновна", "Екатериновна", "Елизаветовна", "Светлановна"]
+                        firstNames: [
+                            "Александра", "Валентина", "Екатерина", "Елизавета", "Светлана", "Дарина", "Ольга", "Мария", "Татьяна", "Ирина",
+                            "Анастасия", "Виктория", "Наталья", "Юлия", "Галина", "Ксения", "Людмила", "Нина", "Алла", "Елена"
+                        ],
+                        lastNames: [
+                            "Александрова", "Валентинова", "Екатерининская", "Елизаветина", "Светланова", "Петрова", "Миронова", "Козлова",
+                            "Смирнова", "Иванова", "Попова", "Лебедева", "Кузнецова", "Соколова", "Жукова", "Калинина", "Григорьева", "Михайлова"
+                        ],
+                        middleNames: [
+                            "Александровна", "Валентиновна", "Екатериновна", "Елизаветовна", "Светлановна", "Петровна", "Мироновна", "Козловна",
+                            "Смирновна", "Ивановна", "Поповна", "Лебедева", "Кузнецова", "Соколова", "Жуковна", "Калинина", "Григорьевна", "Михайловна"
+                        ]
                     },
                     short: {
-                        firstNames: ["Аня", "Лена", "Юля", "Ира", "Зоя"],
-                        lastNames: ["Петрова", "Цакова", "Миронова", "Соколова", "Иванова"],
-                        middleNames: ["Петровна", "Цаковна", "Мироновна", "Соколовна", "Ивановна"]
+                        firstNames: [
+                            "Аня", "Лена", "Юля", "Ира", "Зоя", "Нина", "Оля", "Ксюша", "Катя", "Таня", "Маша", "Алла", "Наташа"
+                        ],
+                        lastNames: [
+                            "Петрова", "Цакова", "Миронова", "Соколова", "Иванова", "Попова", "Кузнецова", "Лебедева", "Тихонова", "Шевченко"
+                        ],
+                        middleNames: [
+                            "Петровна", "Цаковна", "Мироновна", "Соколовна", "Ивановна", "Поповна", "Лебедева", "Кузнецова", "Шевченкова", "Тихонова"
+                        ]
                     }
                 }
             },
             eng: {
                 male: {
                     long: {
-                        firstNames: ["Alexander", "Christopher", "Nathaniel", "Benjamin", "Sebastian"],
-                        lastNames: ["Alexander", "Johnson", "Washington", "Henderson", "McAllister"],
+                        firstNames: [
+                            "Alexander", "Christopher", "Nathaniel", "Benjamin", "Sebastian", "Matthew", "William", "Joseph", "Edward", "Samuel",
+                            "John", "Henry", "George", "Charles", "David", "James", "Mark", "Daniel", "Thomas", "Luke"
+                        ],
+                        lastNames: [
+                            "Alexander", "Johnson", "Washington", "Henderson", "McAllister", "Smith", "Adams", "Bennett", "Carter", "Evans",
+                            "Mitchell", "Turner", "Walker", "Young", "King", "Scott", "Gray", "Hill", "Green", "White"
+                        ]
                     },
                     short: {
-                        firstNames: ["Tom", "Max", "Ian", "Leo", "Ben"],
-                        lastNames: ["Smith", "Jones", "Brown", "White", "Miller"],
+                        firstNames: [
+                            "Tom", "Max", "Ian", "Leo", "Ben", "John", "Jake", "Sam", "Mark", "Dan"
+                        ],
+                        lastNames: [
+                            "Smith", "Jones", "Brown", "White", "Miller", "Davis", "Clark", "Evans", "Hall", "Moore"
+                        ]
                     }
                 },
                 woman: {
                     long: {
-                        firstNames: ["Elizabeth", "Catherine", "Victoria", "Madeline", "Alexandra"],
-                        lastNames: ["Johnson", "Harrison", "McArthur", "Fitzgerald", "Winchester"],
+                        firstNames: [
+                            "Elizabeth", "Catherine", "Victoria", "Madeline", "Alexandra", "Sarah", "Emily", "Rebecca", "Alice", "Charlotte",
+                            "Eleanor", "Amelia", "Sophia", "Isabella", "Abigail", "Lillian", "Grace", "Olivia", "Megan", "Hannah"
+                        ],
+                        lastNames: [
+                            "Johnson", "Harrison", "McArthur", "Fitzgerald", "Winchester", "Thompson", "Davis", "Miller", "Martinez", "Anderson",
+                            "Rodriguez", "Brown", "Wilson", "Moore", "Clark", "Scott", "Evans", "King", "Allen", "Mitchell"
+                        ]
                     },
                     short: {
-                        firstNames: ["Amy", "Jane", "Emma", "Ivy", "Mia"],
-                        lastNames: ["Smith", "Jones", "Brown", "Davis", "Clark"],
+                        firstNames: [
+                            "Amy", "Jane", "Emma", "Ivy", "Mia", "Sophie", "Lily", "Chloe", "Zoe", "Lucy"
+                        ],
+                        lastNames: [
+                            "Smith", "Jones", "Brown", "Davis", "Clark", "Evans", "Wilson", "Harris", "Martin", "Lopez"
+                        ]
                     }
                 }
             },
@@ -432,7 +484,7 @@
         const randomSettings = {
             formatName: 'first',
             transform: "default",
-            sort: "default",
+            sort: "alphabet",
             lang: "rus",
             length: "long",
             gender: "male",
@@ -455,33 +507,16 @@
             btn.addEventListener('click', () => {
                 const formatName = btn.getAttribute('data-formatName');
                 randomSettings.formatName = formatName;
-                parent.postMessage({ pluginMessage: { type: 'updateFormatName', formatName } }, '*');
+                sendUpdatedSettings();
                 updateNameInFigma();
             });
         });
 
         dataLang.forEach(btn => {
             btn.addEventListener('click', () => {
-                
                 const changeLang = btn.getAttribute('data-lang');
                 randomSettings.lang = changeLang;
-
-                parent.postMessage({
-                    pluginMessage: {
-                        type: 'updateSettings',
-                        settings: { lang: changeLang }
-                    }
-                }, '*');
-
-                const formatName = btn.getAttribute('data-formatName');
-                if (formatName) {
-                    parent.postMessage({
-                        pluginMessage: {
-                            type: 'updateFormatName',
-                            formatName
-                        }
-                    }, '*');
-                }
+                sendUpdatedSettings();
                 updateNameInFigma();
             });
         });
@@ -489,6 +524,7 @@
         dataLength.forEach(btn => {
             btn.addEventListener('click', () => {
                 randomSettings.length = btn.getAttribute('data-length');
+                sendUpdatedSettings();
                 updateNameInFigma()
             });
         });
@@ -496,6 +532,7 @@
         dataGender.forEach(btn => {
             btn.addEventListener('click', () => {
                 randomSettings.gender = btn.getAttribute('data-gender');
+                sendUpdatedSettings();
                 updateNameInFigma()
             });
         });
@@ -503,6 +540,7 @@
         dataTransform.forEach(btn => {
             btn.addEventListener('click', () => {
                 randomSettings.transform = btn.getAttribute('data-transform');
+                sendUpdatedSettings();
                 updateNameInFigma();
             });
         });
@@ -510,10 +548,24 @@
         dataSort.forEach((btn) => {
             btn.addEventListener('click', () => {
                 randomSettings.sort = btn.getAttribute('data-sort');
-                updateNameInFigma();
+
+                sendUpdatedSettings();
+
+                updateNameInFigma(randomSettings.sort);
             });
         });
+
         // functions for plugin 
+
+        function sendUpdatedSettings() {
+            parent.postMessage({
+                pluginMessage: {
+                    type: 'updateSettings',
+                    settings: { ...randomSettings }
+                }
+            }, '*');
+        }
+
         function updateNameInFigma() {
             const generatedName = generateName(randomSettings);
             parent.postMessage({
@@ -572,49 +624,72 @@
         }
 
         function generateName(settings) {
-            const { lang, gender, length, formatName, transform } = settings;
+            const { lang, gender, length, formatName, transform, sort } = settings;
 
-            // hideBlockLanguage();
+            console.log("Settings:", settings);
 
             const lengthType = length === "random" ? (Math.random() > 0.5 ? "long" : "short") : length;
 
             let names;
-            if (namesData && namesData[lang] && namesData[lang][gender] && namesData[lang][gender][lengthType]) {
+            if (namesData[lang] && namesData[lang][gender] && namesData[lang][gender][lengthType]) {
                 names = namesData[lang][gender][lengthType];
+                console.log("Names data found:", names);
             } else {
                 console.error("Ошибка: Недостаточно данных для генерации имени", namesData);
                 return "Ошибка генерации имени";
             }
 
-            if (!Array.isArray(names.firstNames) || !Array.isArray(names.lastNames)) {
-                console.error("Ошибка: Недостаточно данных для генерации имени", names);
-                return "Ошибка генерации имени";
+            // Сортировка имен по алфавиту
+            if (sort === "alphabet") {
+                if (names.firstNames) names.firstNames.sort();
+                if (names.lastNames) names.lastNames.sort();
+                if (names.middleNames) names.middleNames.sort();
+            }
+
+            if (!names.lastNames || names.lastNames.length === 0) {
+                console.error("LastNames array is empty or undefined");
+                return "Ошибка: нет фамилий";
             }
 
             const firstName = names.firstNames[Math.floor(Math.random() * names.firstNames.length)];
             const lastName = names.lastNames[Math.floor(Math.random() * names.lastNames.length)];
+            const middleName = names.middleNames
+                ? names.middleNames[Math.floor(Math.random() * names.middleNames.length)]
+                : '';
 
-            let middleName = '';
-            if (names.middleNames && Array.isArray(names.middleNames)) {
-                middleName = names.middleNames[Math.floor(Math.random() * names.middleNames.length)];
+            console.log("Selected Names:", { firstName, lastName, middleName });
+
+            if (!namesData.formats[formatName]) {
+                console.error("Unknown formatName:", formatName);
+                return "Ошибка: неизвестный формат";
             }
 
-            let fullName = '';
+            console.log("Calling format function with:", { formatName, firstName, lastName, middleName });
 
+            let fullName = '';
             if (formatName === 'last') {
-                fullName = namesData.formats.last(lastName);
+                fullName = namesData.formats[formatName](lastName);
             } else if (formatName === 'middle') {
-                fullName = namesData.formats.middle(middleName);
-            } else if (formatName === 'first') {
-                fullName = namesData.formats.first(firstName);
+                fullName = namesData.formats[formatName](middleName);
             } else {
                 fullName = namesData.formats[formatName](firstName, lastName, middleName);
             }
 
+            console.log("Generated FullName:", fullName);
             return changeTransformText(fullName, transform);
         }
 
+        const test = {
+            formatName: 'first',
+            transform: "default",
+            sort: "default",
+            lang: "rus",
+            length: "long",
+            gender: "male",
+        };
 
+        console.log(test)
+        generateName(test)
     </script>
 </body>
 
