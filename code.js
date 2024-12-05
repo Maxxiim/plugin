@@ -257,47 +257,54 @@ figma.ui.onmessage = async (msg) => {
                 }
             }
 
-            if (generatedNames.length > 0) {
-                // Печать имен перед сортировкой для отладки
-                console.log("До сортировки:", generatedNames.map(item => item.name));
+           if (generatedNames.length > 0) {
+    console.log("До сортировки:", generatedNames.map(item => item.name));
 
-                // Убираем повторяющиеся имена в массиве и сохраняем информацию о соответствующих позициях
-                const uniqueNamesMap = new Map();
-                generatedNames.forEach(item => {
-                    if (!uniqueNamesMap.has(item.name)) {
-                        uniqueNamesMap.set(item.name, item);
-                    }
-                });
+    // Убираем повторяющиеся имена в массиве и сохраняем информацию о соответствующих позициях
+    const uniqueNamesMap = new Map();
+    generatedNames.forEach(item => {
+        if (!uniqueNamesMap.has(item.name)) {
+            uniqueNamesMap.set(item.name, item);
+        }
+    });
 
-                // Преобразуем обратно в массив, который теперь содержит только уникальные элементы
-                const uniqueNames = Array.from(uniqueNamesMap.values());
+    // Преобразуем обратно в массив, который теперь содержит только уникальные элементы
+    const uniqueNames = Array.from(uniqueNamesMap.values());
 
-                // Сортировка сначала по имени, затем по Y, затем по X
-                const sortedNames = uniqueNames
-                    .sort((a, b) => {
-                        if (a.name === b.name) {
-                            if (a.yPosition === b.yPosition) {
-                                return a.xPosition - b.xPosition; // Сортировка по X
-                            }
-                            return a.yPosition - b.yPosition; // Сортировка по Y
-                        }
-                        return a.name.localeCompare(b.name, 'ru'); // Сортировка по имени на русском
-                    });
-
-                // Печать имен после сортировки для отладки
-                console.log("После сортировки:", sortedNames.map(item => item.name));
-
-                // Установка отсортированных имен обратно в текстовые объекты
-                for (let i = 0; i < sortedNames.length; i++) {
-                    const { node, name } = sortedNames[i];
-                    await loadFonts(node.fontName);
-                    node.characters = name; // Устанавливаем имя в текст
-                }
-
-                figma.notify("Имена сгенерированы и отсортированы.");
-            } else {
-                figma.notify("Выберите текстовые объекты для генерации имен.");
+    // Сортировка сначала по имени (алфавитный порядок), затем по Y, затем по X
+    const sortedNames = uniqueNames
+        .sort((a, b) => {
+            const nameComparison = a.name.localeCompare(b.name, 'ru'); // Сортировка по имени
+            if (nameComparison !== 0) {
+                return nameComparison; // Если имена разные, сортируем только по имени
             }
+            if (a.yPosition === b.yPosition) {
+                return a.xPosition - b.xPosition; // Если Y одинаковый, сортируем по X
+            }
+            return a.yPosition - b.yPosition; // Сортировка по Y
+        });
+
+    console.log("После сортировки:", sortedNames.map(item => item.name));
+
+    // Создаем массив только с именами в порядке сортировки
+    const sortedNamesArray = sortedNames.map(item => item.name);
+
+    // Отрисовка: связываем имена из массива с текстовыми объектами
+    for (let i = 0; i < sortedNames.length; i++) {
+        const { node } = sortedNames[i];
+        const name = sortedNamesArray[i]; // Получаем имя из отсортированного массива
+        try {
+            await loadFonts(node.fontName); // Загружаем шрифт для каждого текстового объекта
+            node.characters = name; // Устанавливаем имя в текст
+        } catch (error) {
+            figma.notify(`Ошибка загрузки шрифта: ${error.message}`);
+        }
+    }
+
+    figma.notify("Имена сгенерированы и отсортированы.");
+} else {
+    figma.notify("Выберите текстовые объекты для генерации имен.");
+}
         }
     };
 };

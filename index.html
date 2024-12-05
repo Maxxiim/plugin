@@ -545,17 +545,28 @@
             });
         });
 
+
+
+
         dataSort.forEach((btn) => {
             btn.addEventListener('click', () => {
-                randomSettings.sort = btn.getAttribute('data-sort');
-
-                sendUpdatedSettings();
-
-                updateNameInFigma(randomSettings.sort);
+                const sortType = btn.getAttribute('data-sort'); 
+                sendSortCommand(sortType);
             });
         });
 
+
+
         // functions for plugin 
+
+        function sendSortCommand(sortType) {
+            parent.postMessage({
+                pluginMessage: {
+                    type: 'sortSelected',
+                    sort: sortType,
+                }
+            }, '*');
+        }
 
         function sendUpdatedSettings() {
             parent.postMessage({
