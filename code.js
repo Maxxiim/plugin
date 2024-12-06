@@ -225,7 +225,6 @@ figma.ui.onmessage = async (msg) => {
     }
 
     if (msg.type === 'updateSettings') {
-        console.log(msg.settings)
         if (msg.settings) {
             Object.assign(randomSettings, msg.settings);
         }
@@ -262,11 +261,10 @@ figma.ui.onmessage = async (msg) => {
             figma.notify("Выберите текстовые объекты для генерации имен.");
         }
     }
-    console.log("нажато было по алфавиту 1")
 
     // Добавляем проверку для сортировки по алфавиту
-    if (msg.type === 'alphabet') {
-        console.log("нажато было по алфавиту 2")
+
+    if (msg.type === 'sortSelected') {
 
         const selectedNodes = figma.currentPage.selection;
 
@@ -284,30 +282,31 @@ figma.ui.onmessage = async (msg) => {
                             xPosition: node.x,
                             yPosition: node.y
                         });
+
                     } catch (error) {
+
                         figma.notify(`Ошибка загрузки шрифта: ${error.message}`);
                     }
                 }
             }
 
-            if (textNodes.length > 0) {
-                // Сортируем текстовые узлы по имени (алфавитный порядок)
-                const sortedNodes = textNodes.sort((a, b) => a.name.localeCompare(b.name, 'ru'));
+            if (textNodes.length > 1) {
+                // Сортируем узлы по имени (алфавитно)
+                const sortedNodes = [...textNodes].sort((a, b) => a.name.localeCompare(b.name, 'ru'));
 
-                console.log("До сортировки:", textNodes.map(item => item.name));
-                console.log("После сортировки:", sortedNodes.map(item => item.name));
+                console.log("До сортировки:", textNodes.map(node => node.name));
+                console.log("После сортировки:", sortedNodes.map(node => node.name));
+                // Получаем текущие координаты узлов
+                const positions = textNodes.map(node => ({ x: node.x, y: node.y }));
 
-                // Перемещаем узлы в соответствии с отсортированным порядком
-                for (let i = 0; i < sortedNodes.length; i++) {
-                    const { node } = sortedNodes[i];
+                // Меняем узлы местами в зависимости от отсортированного порядка
+                sortedNodes.forEach((node, index) => {
+                    const { x, y } = positions[index]; // Координаты текущей позиции
 
-                    // Новые координаты для узлов
-                    const newX = sortedNodes[0].xPosition; // Выровняем по X первой позиции
-                    const newY = sortedNodes[0].yPosition + i * 50; // Равномерный отступ по Y
-
-                    node.x = newX;
-                    node.y = newY;
-                }
+                    // Меняем узлы местами, используя зафиксированные позиции
+                    node.x = x; // Оставляем ось X
+                    node.y = y; // Устанавливаем новый Y, соответствующий отсортированному порядку
+                });
 
                 figma.notify("Текстовые объекты отсортированы по алфавиту.");
             } else {
