@@ -482,9 +482,9 @@
         };
 
         const randomSettings = {
-            formatName: 'first',
+            formatName: 'last',
             transform: "default",
-            sort: "alphabet",
+            sort: "default",
             lang: "rus",
             length: "long",
             gender: "male",
@@ -550,7 +550,7 @@
 
         dataSort.forEach((btn) => {
             btn.addEventListener('click', () => {
-                const sortType = btn.getAttribute('data-sort'); 
+                const sortType = btn.getAttribute('data-sort');
                 sendSortCommand(sortType);
             });
         });
@@ -566,6 +566,7 @@
                     sort: sortType,
                 }
             }, '*');
+            console.log('Сообщение отправлено в основной код')
         }
 
         function sendUpdatedSettings() {
@@ -637,16 +638,12 @@
         function generateName(settings) {
             const { lang, gender, length, formatName, transform, sort } = settings;
 
-            console.log("Settings:", settings);
-
             const lengthType = length === "random" ? (Math.random() > 0.5 ? "long" : "short") : length;
 
             let names;
             if (namesData[lang] && namesData[lang][gender] && namesData[lang][gender][lengthType]) {
                 names = namesData[lang][gender][lengthType];
-                console.log("Names data found:", names);
             } else {
-                console.error("Ошибка: Недостаточно данных для генерации имени", namesData);
                 return "Ошибка генерации имени";
             }
 
@@ -658,7 +655,6 @@
             }
 
             if (!names.lastNames || names.lastNames.length === 0) {
-                console.error("LastNames array is empty or undefined");
                 return "Ошибка: нет фамилий";
             }
 
@@ -668,10 +664,8 @@
                 ? names.middleNames[Math.floor(Math.random() * names.middleNames.length)]
                 : '';
 
-            console.log("Selected Names:", { firstName, lastName, middleName });
 
             if (!namesData.formats[formatName]) {
-                console.error("Unknown formatName:", formatName);
                 return "Ошибка: неизвестный формат";
             }
 

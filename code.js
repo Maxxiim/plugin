@@ -140,14 +140,14 @@ const randomSettings = {
 function generateName(settings) {
     const { lang, gender, length, formatName, transform, sort } = settings;
 
-    console.log("Settings:", settings);
+    // console.log("Settings:", settings);
 
     const lengthType = length === "random" ? (Math.random() > 0.5 ? "long" : "short") : length;
 
     let names;
     if (namesData[lang] && namesData[lang][gender] && namesData[lang][gender][lengthType]) {
         names = namesData[lang][gender][lengthType];
-        console.log("Names data found:", names);
+        // console.log("Names data found:", names);
     } else {
         console.error("Ошибка: Недостаточно данных для генерации имени", namesData);
         return "Ошибка генерации имени";
@@ -171,14 +171,14 @@ function generateName(settings) {
         ? names.middleNames[Math.floor(Math.random() * names.middleNames.length)]
         : '';
 
-    console.log("Selected Names:", { firstName, lastName, middleName });
+    // console.log("Selected Names:", { firstName, lastName, middleName });
 
     if (!namesData.formats[formatName]) {
-        console.error("Unknown formatName:", formatName);
+        // console.error("Unknown formatName:", formatName);
         return "Ошибка: неизвестный формат";
     }
 
-    console.log("Calling format function with:", { formatName, firstName, lastName, middleName });
+    // console.log("Calling format function with:", { formatName, firstName, lastName, middleName });
 
     let fullName = '';
     if (formatName === 'last') {
@@ -189,7 +189,7 @@ function generateName(settings) {
         fullName = namesData.formats[formatName](firstName, lastName, middleName);
     }
 
-    console.log("Generated FullName:", fullName);
+    // console.log("Generated FullName:", fullName);
     return changeTransformText(fullName, transform);
 }
 
@@ -225,9 +225,11 @@ figma.ui.onmessage = async (msg) => {
     }
 
     if (msg.type === 'updateSettings') {
+        console.log(msg.settings)
         if (msg.settings) {
             Object.assign(randomSettings, msg.settings);
         }
+
     }
 
     if (msg.type === 'updateText') {
@@ -236,13 +238,11 @@ figma.ui.onmessage = async (msg) => {
         if (selectedNodes.length > 0) {
             let generatedNames = [];
 
-            // Генерация имен для всех выбранных текстовых объектов
             for (const node of selectedNodes) {
                 if (node.type === 'TEXT') {
                     try {
                         await loadFonts(node.fontName);
 
-                        // Генерация имени
                         const uniqueName = generateName(randomSettings);
                         generatedNames.push({
                             node: node,
@@ -250,61 +250,71 @@ figma.ui.onmessage = async (msg) => {
                             xPosition: node.x,
                             yPosition: node.y
                         });
-
+                        node.characters = uniqueName; // Устанавливаем сгенерированное имя
                     } catch (error) {
                         figma.notify(`Ошибка загрузки шрифта: ${error.message}`);
                     }
                 }
             }
 
-           if (generatedNames.length > 0) {
-    console.log("До сортировки:", generatedNames.map(item => item.name));
-
-    // Убираем повторяющиеся имена в массиве и сохраняем информацию о соответствующих позициях
-    const uniqueNamesMap = new Map();
-    generatedNames.forEach(item => {
-        if (!uniqueNamesMap.has(item.name)) {
-            uniqueNamesMap.set(item.name, item);
-        }
-    });
-
-    // Преобразуем обратно в массив, который теперь содержит только уникальные элементы
-    const uniqueNames = Array.from(uniqueNamesMap.values());
-
-    // Сортировка сначала по имени (алфавитный порядок), затем по Y, затем по X
-    const sortedNames = uniqueNames
-        .sort((a, b) => {
-            const nameComparison = a.name.localeCompare(b.name, 'ru'); // Сортировка по имени
-            if (nameComparison !== 0) {
-                return nameComparison; // Если имена разные, сортируем только по имени
-            }
-            if (a.yPosition === b.yPosition) {
-                return a.xPosition - b.xPosition; // Если Y одинаковый, сортируем по X
-            }
-            return a.yPosition - b.yPosition; // Сортировка по Y
-        });
-
-    console.log("После сортировки:", sortedNames.map(item => item.name));
-
-    // Создаем массив только с именами в порядке сортировки
-    const sortedNamesArray = sortedNames.map(item => item.name);
-
-    // Отрисовка: связываем имена из массива с текстовыми объектами
-    for (let i = 0; i < sortedNames.length; i++) {
-        const { node } = sortedNames[i];
-        const name = sortedNamesArray[i]; // Получаем имя из отсортированного массива
-        try {
-            await loadFonts(node.fontName); // Загружаем шрифт для каждого текстового объекта
-            node.characters = name; // Устанавливаем имя в текст
-        } catch (error) {
-            figma.notify(`Ошибка загрузки шрифта: ${error.message}`);
+            figma.notify("Имена сгенерированы.");
+        } else {
+            figma.notify("Выберите текстовые объекты для генерации имен.");
         }
     }
+    console.log("нажато было по алфавиту 1")
 
-    figma.notify("Имена сгенерированы и отсортированы.");
-} else {
-    figma.notify("Выберите текстовые объекты для генерации имен.");
-}
+    // Добавляем проверку для сортировки по алфавиту
+    if (msg.type === 'alphabet') {
+        console.log("нажато было по алфавиту 2")
+
+        const selectedNodes = figma.currentPage.selection;
+
+        if (selectedNodes.length > 0) {
+            let textNodes = [];
+
+            for (const node of selectedNodes) {
+                if (node.type === 'TEXT') {
+                    try {
+                        await loadFonts(node.fontName);
+
+                        textNodes.push({
+                            node: node,
+                            name: node.characters,
+                            xPosition: node.x,
+                            yPosition: node.y
+                        });
+                    } catch (error) {
+                        figma.notify(`Ошибка загрузки шрифта: ${error.message}`);
+                    }
+                }
+            }
+
+            if (textNodes.length > 0) {
+                // Сортируем текстовые узлы по имени (алфавитный порядок)
+                const sortedNodes = textNodes.sort((a, b) => a.name.localeCompare(b.name, 'ru'));
+
+                console.log("До сортировки:", textNodes.map(item => item.name));
+                console.log("После сортировки:", sortedNodes.map(item => item.name));
+
+                // Перемещаем узлы в соответствии с отсортированным порядком
+                for (let i = 0; i < sortedNodes.length; i++) {
+                    const { node } = sortedNodes[i];
+
+                    // Новые координаты для узлов
+                    const newX = sortedNodes[0].xPosition; // Выровняем по X первой позиции
+                    const newY = sortedNodes[0].yPosition + i * 50; // Равномерный отступ по Y
+
+                    node.x = newX;
+                    node.y = newY;
+                }
+
+                figma.notify("Текстовые объекты отсортированы по алфавиту.");
+            } else {
+                figma.notify("Выберите текстовые объекты для сортировки.");
+            }
+        } else {
+            figma.notify("Выберите текстовые объекты для сортировки.");
         }
-    };
+    }
 };
