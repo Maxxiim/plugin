@@ -224,32 +224,34 @@ figma.ui.onmessage = async (msg) => {
         }
     }
 
-    if (msg.type === 'updateSettings') {
-        if (msg.settings) {
-            Object.assign(randomSettings, msg.settings);
-        }
-
-    }
-
     if (msg.type === 'updateText') {
         const selectedNodes = figma.currentPage.selection;
 
         if (selectedNodes.length > 0) {
             let generatedNames = [];
+            let uniqueNames = new Set();  
 
             for (const node of selectedNodes) {
                 if (node.type === 'TEXT') {
                     try {
                         await loadFonts(node.fontName);
 
-                        const uniqueName = generateName(randomSettings);
+                        let uniqueName;
+                        do {
+                            uniqueName = generateName(randomSettings);
+                        } while (uniqueNames.has(uniqueName)); 
+
+                        uniqueNames.add(uniqueName);
+
                         generatedNames.push({
                             node: node,
                             name: uniqueName,
                             xPosition: node.x,
-                            yPosition: node.y
+                            yPosition: node.y,
+                            parentGroup: node.parent 
                         });
-                        node.characters = uniqueName; // Устанавливаем сгенерированное имя
+
+                        node.characters = uniqueName; 
                     } catch (error) {
                         figma.notify(`Ошибка загрузки шрифта: ${error.message}`);
                     }
@@ -262,10 +264,7 @@ figma.ui.onmessage = async (msg) => {
         }
     }
 
-    // Добавляем проверку для сортировки по алфавиту
-
     if (msg.type === 'sortSelected') {
-
         const selectedNodes = figma.currentPage.selection;
 
         if (selectedNodes.length > 0) {
@@ -277,35 +276,51 @@ figma.ui.onmessage = async (msg) => {
                         await loadFonts(node.fontName);
 
                         textNodes.push({
-                            node: node,
-                            name: node.characters,
-                            xPosition: node.x,
-                            yPosition: node.y
+                            node: node, 
+                            name: node.characters, 
+                            xPosition: node.x, 
+                            yPosition: node.y, 
+                            parentGroup: node.parent 
                         });
-
                     } catch (error) {
-
                         figma.notify(`Ошибка загрузки шрифта: ${error.message}`);
                     }
                 }
             }
 
             if (textNodes.length > 1) {
-                // Сортируем узлы по имени (алфавитно)
                 const sortedNodes = [...textNodes].sort((a, b) => a.name.localeCompare(b.name, 'ru'));
+                console.log("После сортировки (алфавит):", sortedNodes.map(node => node.name));
 
-                console.log("До сортировки:", textNodes.map(node => node.name));
-                console.log("После сортировки:", sortedNodes.map(node => node.name));
-                // Получаем текущие координаты узлов
-                const positions = textNodes.map(node => ({ x: node.x, y: node.y }));
+                const sortedByPosition = [...textNodes].sort((a, b) => {
+                    if (a.yPosition === b.yPosition) {
+                        return a.xPosition - b.xPosition; 
+                    }
+                    return a.yPosition - b.yPosition; 
+                });
 
-                // Меняем узлы местами в зависимости от отсортированного порядка
-                sortedNodes.forEach((node, index) => {
-                    const { x, y } = positions[index]; // Координаты текущей позиции
+                console.log("Исходный порядок (по Y, затем X):", sortedByPosition.map(node => node.name));
 
-                    // Меняем узлы местами, используя зафиксированные позиции
-                    node.x = x; // Оставляем ось X
-                    node.y = y; // Устанавливаем новый Y, соответствующий отсортированному порядку
+                if (sortedNodes.length !== sortedByPosition.length) {
+                    console.error("Массивы не совпадают по длине.");
+                    return;
+                }
+
+                sortedNodes.forEach((sortedNode, index) => {
+                    const correspondingNode = sortedByPosition[index].node;
+
+                    correspondingNode.x = sortedNode.xPosition;
+                    correspondingNode.y = sortedNode.yPosition; 
+
+                    const oldParentGroup = correspondingNode.parent;
+                    if (oldParentGroup) {
+                        oldParentGroup.removeChild(correspondingNode); 
+                    }
+
+                    const newParentGroup = sortedNode.parentGroup; 
+                    if (newParentGroup) {
+                        newParentGroup.appendChild(correspondingNode); 
+                    }
                 });
 
                 figma.notify("Текстовые объекты отсортированы по алфавиту.");
