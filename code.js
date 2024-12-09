@@ -224,34 +224,32 @@ figma.ui.onmessage = async (msg) => {
         }
     }
 
+    if (msg.type === 'updateSettings') {
+        if (msg.settings) {
+            Object.assign(randomSettings, msg.settings);
+        }
+
+    }
+
     if (msg.type === 'updateText') {
         const selectedNodes = figma.currentPage.selection;
 
         if (selectedNodes.length > 0) {
             let generatedNames = [];
-            let uniqueNames = new Set();  
 
             for (const node of selectedNodes) {
                 if (node.type === 'TEXT') {
                     try {
                         await loadFonts(node.fontName);
 
-                        let uniqueName;
-                        do {
-                            uniqueName = generateName(randomSettings);
-                        } while (uniqueNames.has(uniqueName)); 
-
-                        uniqueNames.add(uniqueName);
-
+                        const uniqueName = generateName(randomSettings);
                         generatedNames.push({
                             node: node,
                             name: uniqueName,
                             xPosition: node.x,
-                            yPosition: node.y,
-                            parentGroup: node.parent 
+                            yPosition: node.y
                         });
-
-                        node.characters = uniqueName; 
+                        node.characters = uniqueName; // Устанавливаем сгенерированное имя
                     } catch (error) {
                         figma.notify(`Ошибка загрузки шрифта: ${error.message}`);
                     }
@@ -264,71 +262,92 @@ figma.ui.onmessage = async (msg) => {
         }
     }
 
+    // Добавляем проверку для сортировки по алфавиту
+
     if (msg.type === 'sortSelected') {
         const selectedNodes = figma.currentPage.selection;
 
         if (selectedNodes.length > 0) {
             let textNodes = [];
 
+            // Шаг 1: Определяем исходные группы для каждого узла
             for (const node of selectedNodes) {
                 if (node.type === 'TEXT') {
                     try {
                         await loadFonts(node.fontName);
 
+                        // Сохраняем данные о каждом тексте (включая информацию о родительской группе)
                         textNodes.push({
-                            node: node, 
-                            name: node.characters, 
-                            xPosition: node.x, 
-                            yPosition: node.y, 
-                            parentGroup: node.parent 
+                            node: node,
+                            name: node.characters,
+                            xPosition: node.x,
+                            yPosition: node.y,
+                            originalParent: node.parent, // Исходная группа
                         });
+
                     } catch (error) {
                         figma.notify(`Ошибка загрузки шрифта: ${error.message}`);
                     }
                 }
             }
 
+            console.log(textNodes, 'textNodes')
             if (textNodes.length > 1) {
+                // Шаг 2: Сортируем узлы по имени (алфавитно)
                 const sortedNodes = [...textNodes].sort((a, b) => a.name.localeCompare(b.name, 'ru'));
-                console.log("После сортировки (алфавит):", sortedNodes.map(node => node.name));
-
-                const sortedByPosition = [...textNodes].sort((a, b) => {
-                    if (a.yPosition === b.yPosition) {
-                        return a.xPosition - b.xPosition; 
-                    }
-                    return a.yPosition - b.yPosition; 
-                });
-
-                console.log("Исходный порядок (по Y, затем X):", sortedByPosition.map(node => node.name));
-
-                if (sortedNodes.length !== sortedByPosition.length) {
-                    console.error("Массивы не совпадают по длине.");
-                    return;
-                }
+                console.log(sortedNodes, 'sortedNodes');
 
                 sortedNodes.forEach((sortedNode, index) => {
-                    const correspondingNode = sortedByPosition[index].node;
+                    const originalNode = textNodes[index]; // Узел до сортировки
+                    console.log(originalNode, 'originalNode')
+                    const originalParent = originalNode.originalParent; // Исходная группа
+                    console.log(originalParent, 'originalParent')
+                    const newParent = sortedNode.originalParent; // Здесь пока что оставляем исходную группу
+                    console.log(newParent, 'newParent');
 
-                    correspondingNode.x = sortedNode.xPosition;
-                    correspondingNode.y = sortedNode.yPosition; 
-
-                    const oldParentGroup = correspondingNode.parent;
-                    if (oldParentGroup) {
-                        oldParentGroup.removeChild(correspondingNode); 
+                    // Шаг 3: Распределяем по группам в зависимости от координат по оси Y
+                    let newGroup;
+                    if (sortedNode.yPosition < originalNode.yPosition) {
+                        newGroup = sortedNode.node.parent; // Например, если текст выше, то помещаем в группу, выше расположенную по оси Y
+                        console.log(newGroup, 'if')
+                    } else {
+                        newGroup = originalNode.node.parent; // Иначе в нижнюю группу
+                        console.log(newGroup, 'else')
                     }
 
-                    const newParentGroup = sortedNode.parentGroup; 
-                    if (newParentGroup) {
-                        newParentGroup.appendChild(correspondingNode); 
+                    console.log('test')
+
+                    
+                    if (originalParent && originalParent.type === 'GROUP') {
+                        // Проверяем, есть ли дочерние узлы в родительской группе
+                        if (originalParent.children && originalParent.children.length > 0) {
+                            // Перемещаем все дочерние элементы из старой группы в новую группу
+                            originalParent.children.forEach(childNode => {
+                                // Проверяем, не является ли дочерний узел удаленным
+                                if (!childNode.removed) {
+                                    newGroup.appendChild(childNode);
+                                }
+                            });
+                    
+                            // Теперь можно удалить старую группу (где больше нет нужных узлов)
+                            originalParent.remove();
+                            console.log(`Группа "${originalParent.name}" была удалена, все ее дети перемещены в новую группу.`);
+                        }
+                    }
+                    
+                    // Добавляем узел в новую группу
+                    if (newGroup && newGroup.type === 'GROUP') {
+                        // Перемещаем сам узел в новую группу
+                        newGroup.appendChild(sortedNode.node);
+                    
+                        // Обновляем его координаты
+                        sortedNode.node.x = originalNode.xPosition;
+                        sortedNode.node.y = originalNode.yPosition;
+                    
+                        console.log(`Узел "${sortedNode.node.name}" был перемещен в группу "${newGroup.name}".`);
                     }
                 });
-
-                figma.notify("Текстовые объекты отсортированы по алфавиту.");
-            } else {
-                figma.notify("Выберите текстовые объекты для сортировки.");
             }
-        } else {
-            figma.notify("Выберите текстовые объекты для сортировки.");
         }
     }
 };
