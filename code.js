@@ -235,18 +235,18 @@ figma.ui.onmessage = async (msg) => {
             for (const node of selectedNodes) {
                 if (node.type === 'TEXT') {
                     try {
-                        await loadFonts(node.fontName);
-
+                        await figma.loadFontAsync(node.fontName);
                         let uniqueName = generateName(randomSettings);
 
-                        // Проверка на уникальность
+                        // Проверка на уникальность имени
                         while (usedNames.has(uniqueName)) {
                             uniqueName = generateName(randomSettings);
                         }
 
                         usedNames.add(uniqueName);
 
-                        // Сохраняем информацию о тексте и его координатах
+                        node.characters = uniqueName;
+
                         generatedNames.push({
                             node: node,
                             name: uniqueName,
@@ -254,9 +254,9 @@ figma.ui.onmessage = async (msg) => {
                             yPosition: node.y
                         });
 
-                        // Устанавливаем уникальное имя в текстовый узел
                         node.characters = uniqueName;
 
+                        console.log(uniqueName, 'уникальное имя')
                     } catch (error) {
                         figma.notify(`Ошибка загрузки шрифта: ${error.message}`);
                     }
@@ -269,29 +269,69 @@ figma.ui.onmessage = async (msg) => {
         }
     }
 
-    // Обработчик для сортировки по алфавиту
     if (msg.type === 'sortSelected') {
-        console.log('Событие сортировки получено');
+        const selectedNodes = figma.currentPage.selection;
 
-        if (generatedNames.length > 0) {
-            // Сортируем сгенерированные имена по алфавиту
-            const sortedNames = [...generatedNames].sort((a, b) => a.name.localeCompare(b.name, 'ru'));
+        // Проверяем, что хотя бы один узел выбран
+        if (selectedNodes.length > 0) {
+            // Фильтруем только текстовые узлы
+            const textNodes = selectedNodes.filter(node => node.type === 'TEXT');
 
-            console.log(sortedNames, 'сортированные имена');  // Выводим отсортированные имена для отладки
+            // Если хотя бы два текстовых узла выбраны
+            if (textNodes.length > 1) {
+                // Сбор текстового содержимого и создание массива объектов с узлами, их текстами и координатами
+                const textsWithNodes = textNodes.map(node => ({
+                    node: node,
+                    text: node.characters,
+                    xPosition: node.x,
+                    yPosition: node.y // Сохраняем координаты
+                }));
 
-            // Применяем отсортированные имена обратно в текстовые узлы
-            sortedNames.forEach((sortedNode, index) => {
-                const node = sortedNode.node;
-                node.characters = sortedNode.name; // Обновляем текст с отсортированным именем
+                // Сортировка текста по алфавиту (по возрастанию)
+                textsWithNodes.sort((a, b) => a.text.localeCompare(b.text, 'ru'));
 
-                // Координаты остаются прежними, они не изменяются
-                node.x = sortedNode.xPosition;
-                node.y = sortedNode.yPosition;
-            });
+                // Логирование координат после сортировки
+                console.log("Координаты после сортировки по алфавиту:");
+                textsWithNodes.forEach(item => {
+                    console.log(`Текст: "${item.text}", x: ${item.xPosition}, y: ${item.yPosition}`);
+                });
 
-            figma.notify("Текстовые узлы успешно отсортированы по алфавиту.");
+                // Меняем координаты между текстовыми объектами попарно
+                for (let i = 0; i < textsWithNodes.length - 1; i += 2) {
+                    const first = textsWithNodes[i];
+                    const second = textsWithNodes[i + 1];
+
+                    // Меняем координаты между текущими элементами
+                    const tempX = first.xPosition;
+                    const tempY = first.yPosition;
+
+                    // Логируем перед заменой
+                    console.log(`Меняем местами: "${first.text}" на координатах (x: ${first.xPosition}, y: ${first.yPosition}) с "${second.text}" на координатах (x: ${second.xPosition}, y: ${second.yPosition})`);
+
+                    first.node.x = second.xPosition;
+                    first.node.y = second.yPosition;
+
+                    second.node.x = tempX;
+                    second.node.y = tempY;
+
+                    // Логируем изменения
+                    console.log("Тексты поменялись местами:");
+                    console.log(`Первый текст "${first.text}" теперь на координатах: x=${first.node.x}, y=${first.node.y}`);
+                    console.log(`Второй текст "${second.text}" теперь на координатах: x=${second.node.x}, y=${second.node.y}`);
+                }
+
+                // Если количество текстов нечетное, последний останется на своих координатах
+                if (textsWithNodes.length % 2 !== 0) {
+                    const last = textsWithNodes[textsWithNodes.length - 1];
+                    console.log(`Последний текст "${last.text}" остался на координатах: x=${last.xPosition}, y=${last.yPosition}`);
+                }
+
+                figma.notify(`Тексты успешно отсортированы и обменялись местами. Всего: ${textsWithNodes.length} текстовых объектов.`);
+            } else {
+                figma.notify("Пожалуйста, выделите хотя бы два текстовых объекта для обмена координатами.");
+            }
         } else {
-            figma.notify("Нет сгенерированных имен для сортировки.");
+            figma.notify("Ничего не выделено.");
         }
     }
 }

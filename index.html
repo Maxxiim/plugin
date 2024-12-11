@@ -666,7 +666,6 @@
                 return "Ошибка: неизвестный формат";
             }
 
-            console.log("Calling format function with:", { formatName, firstName, lastName, middleName });
 
             let fullName = '';
             if (formatName === 'last') {
@@ -677,7 +676,6 @@
                 fullName = namesData.formats[formatName](firstName, lastName, middleName);
             }
 
-            console.log("Generated FullName:", fullName);
             return changeTransformText(fullName, transform);
         }
 
