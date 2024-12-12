@@ -140,14 +140,12 @@ const randomSettings = {
 function generateName(settings) {
     const { lang, gender, length, formatName, transform, sort } = settings;
 
-
     const lengthType = length === "random" ? (Math.random() > 0.5 ? "long" : "short") : length;
 
     let names;
     if (namesData[lang] && namesData[lang][gender] && namesData[lang][gender][lengthType]) {
         names = namesData[lang][gender][lengthType];
     } else {
-        console.error("Ошибка: Недостаточно данных для генерации имени", namesData);
         return "Ошибка генерации имени";
     }
 
@@ -158,7 +156,6 @@ function generateName(settings) {
     }
 
     if (!names.lastNames || names.lastNames.length === 0) {
-        console.error("LastNames array is empty or undefined");
         return "Ошибка: нет фамилий";
     }
 
@@ -172,7 +169,6 @@ function generateName(settings) {
     if (!namesData.formats[formatName]) {
         return "Ошибка: неизвестный формат";
     }
-
 
     let fullName = '';
     if (formatName === 'last') {
@@ -198,8 +194,6 @@ function changeTransformText(text, transform) {
             return text;
     };
 };
-
-
 
 
 figma.showUI(__html__, { width: 400, height: 250 });
@@ -238,7 +232,6 @@ figma.ui.onmessage = async (msg) => {
                         await figma.loadFontAsync(node.fontName);
                         let uniqueName = generateName(randomSettings);
 
-                        // Проверка на уникальность имени
                         while (usedNames.has(uniqueName)) {
                             uniqueName = generateName(randomSettings);
                         }
@@ -271,34 +264,40 @@ figma.ui.onmessage = async (msg) => {
 
     if (msg.type === 'sortSelected') {
         const selectedNodes = figma.currentPage.selection;
-    
+
         if (selectedNodes.length > 0) {
             const textNodes = selectedNodes.filter(node => node.type === 'TEXT');
-    
+
             if (textNodes.length > 1) {
                 const textsWithNodes = textNodes.map(node => ({
                     node: node,
                     text: node.characters,
                     xPosition: node.x,
-                    yPosition: node.y 
+                    yPosition: node.y,
                 }));
-    
-                
-                textsWithNodes.sort((a, b) => a.yPosition - b.yPosition);
-    
-                const sortedTexts = [...textsWithNodes.map(item => item.text)].sort((a, b) => a.localeCompare(b, 'ru'));
-    
+
+
+                textsWithNodes.sort((a, b) => {
+                    if (a.yPosition === b.yPosition && a.xPosition === b.xPosition) {
+                        return a.text.localeCompare(b.text, 'ru');
+                    }
+                    if (a.yPosition === b.yPosition) {
+                        return a.xPosition - b.xPosition;
+                    }
+                    return a.yPosition - b.yPosition;
+                });
+
+
+                const sortedTexts = [...textsWithNodes.map(item => item.text)].sort((a, b) =>
+                    a.localeCompare(b, 'ru')
+                );
+
+
                 textsWithNodes.forEach((item, index) => {
                     item.node.characters = sortedTexts[index];
                     console.log(`Текст "${item.text}" заменён на "${sortedTexts[index]}" на координатах x=${item.xPosition}, y=${item.yPosition}`);
                 });
-    
-                figma.notify(`Тексты успешно отсортированы по алфавиту и заменены. Всего: ${textsWithNodes.length} текстовых объектов.`);
-            } else {
-                figma.notify("Пожалуйста, выделите хотя бы два текстовых объекта для сортировки.");
             }
-        } else {
-            figma.notify("Ничего не выделено.");
         }
     }
 }

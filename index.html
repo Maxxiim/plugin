@@ -634,7 +634,7 @@
 
         function generateName(settings) {
             const { lang, gender, length, formatName, transform, sort } = settings;
-
+            hideBlockLanguage()
             const lengthType = length === "random" ? (Math.random() > 0.5 ? "long" : "short") : length;
 
             let names;
@@ -644,7 +644,6 @@
                 return "Ошибка генерации имени";
             }
 
-            // Сортировка имен по алфавиту
             if (sort === "alphabet") {
                 if (names.firstNames) names.firstNames.sort();
                 if (names.lastNames) names.lastNames.sort();
@@ -679,17 +678,7 @@
             return changeTransformText(fullName, transform);
         }
 
-        const test = {
-            formatName: 'first',
-            transform: "default",
-            sort: "default",
-            lang: "rus",
-            length: "long",
-            gender: "male",
-        };
 
-        console.log(test)
-        generateName(test)
     </script>
 </body>
 
