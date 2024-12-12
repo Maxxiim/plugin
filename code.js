@@ -271,64 +271,31 @@ figma.ui.onmessage = async (msg) => {
 
     if (msg.type === 'sortSelected') {
         const selectedNodes = figma.currentPage.selection;
-
-        // Проверяем, что хотя бы один узел выбран
+    
         if (selectedNodes.length > 0) {
-            // Фильтруем только текстовые узлы
             const textNodes = selectedNodes.filter(node => node.type === 'TEXT');
-
-            // Если хотя бы два текстовых узла выбраны
+    
             if (textNodes.length > 1) {
-                // Сбор текстового содержимого и создание массива объектов с узлами, их текстами и координатами
                 const textsWithNodes = textNodes.map(node => ({
                     node: node,
                     text: node.characters,
                     xPosition: node.x,
-                    yPosition: node.y // Сохраняем координаты
+                    yPosition: node.y 
                 }));
-
-                // Сортировка текста по алфавиту (по возрастанию)
-                textsWithNodes.sort((a, b) => a.text.localeCompare(b.text, 'ru'));
-
-                // Логирование координат после сортировки
-                console.log("Координаты после сортировки по алфавиту:");
-                textsWithNodes.forEach(item => {
-                    console.log(`Текст: "${item.text}", x: ${item.xPosition}, y: ${item.yPosition}`);
+    
+                
+                textsWithNodes.sort((a, b) => a.yPosition - b.yPosition);
+    
+                const sortedTexts = [...textsWithNodes.map(item => item.text)].sort((a, b) => a.localeCompare(b, 'ru'));
+    
+                textsWithNodes.forEach((item, index) => {
+                    item.node.characters = sortedTexts[index];
+                    console.log(`Текст "${item.text}" заменён на "${sortedTexts[index]}" на координатах x=${item.xPosition}, y=${item.yPosition}`);
                 });
-
-                // Меняем координаты между текстовыми объектами попарно
-                for (let i = 0; i < textsWithNodes.length - 1; i += 2) {
-                    const first = textsWithNodes[i];
-                    const second = textsWithNodes[i + 1];
-
-                    // Меняем координаты между текущими элементами
-                    const tempX = first.xPosition;
-                    const tempY = first.yPosition;
-
-                    // Логируем перед заменой
-                    console.log(`Меняем местами: "${first.text}" на координатах (x: ${first.xPosition}, y: ${first.yPosition}) с "${second.text}" на координатах (x: ${second.xPosition}, y: ${second.yPosition})`);
-
-                    first.node.x = second.xPosition;
-                    first.node.y = second.yPosition;
-
-                    second.node.x = tempX;
-                    second.node.y = tempY;
-
-                    // Логируем изменения
-                    console.log("Тексты поменялись местами:");
-                    console.log(`Первый текст "${first.text}" теперь на координатах: x=${first.node.x}, y=${first.node.y}`);
-                    console.log(`Второй текст "${second.text}" теперь на координатах: x=${second.node.x}, y=${second.node.y}`);
-                }
-
-                // Если количество текстов нечетное, последний останется на своих координатах
-                if (textsWithNodes.length % 2 !== 0) {
-                    const last = textsWithNodes[textsWithNodes.length - 1];
-                    console.log(`Последний текст "${last.text}" остался на координатах: x=${last.xPosition}, y=${last.yPosition}`);
-                }
-
-                figma.notify(`Тексты успешно отсортированы и обменялись местами. Всего: ${textsWithNodes.length} текстовых объектов.`);
+    
+                figma.notify(`Тексты успешно отсортированы по алфавиту и заменены. Всего: ${textsWithNodes.length} текстовых объектов.`);
             } else {
-                figma.notify("Пожалуйста, выделите хотя бы два текстовых объекта для обмена координатами.");
+                figma.notify("Пожалуйста, выделите хотя бы два текстовых объекта для сортировки.");
             }
         } else {
             figma.notify("Ничего не выделено.");
